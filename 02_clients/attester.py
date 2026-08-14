@@ -27,6 +27,9 @@ class AttesterAgent:
     def attest(self, session_id, nonce, H_q, H_c, H_p, verdict=1):
         # 1. Evaluate SLA (mocked to match verdict)
         # 2. Construct M_A
+        # In attested fail (verdict 0), the contract expects hash_p to be 32 bytes of zeros.
+        final_H_p = H_p if verdict == 1 else (b'\x00' * 32)
+        
         M_A = (
             config.PROTOCOL_DOMAIN +
             config.ATTEST_PREFIX +
@@ -37,7 +40,7 @@ class AttesterAgent:
             to_uint8(verdict) +
             H_q +
             H_c +
-            H_p
+            final_H_p
         )
         
         # 3. Sign M_A
