@@ -1,0 +1,22 @@
+{
+    "transactions.csv": {
+        "sha256": "6945e3b086d40903a2164d5bac0049a6c34b3a1390b08b8d46040937dbae46c8",
+        "timestamp_utc": "2026-08-14T14:09:42.515630+00:00Z"
+    },
+    "algo_usd_price.csv": {
+        "sha256": "63b506d4b2d2903dad5c7eea1bb0503df0e7eff92ab15ecd44052922974b828e",
+        "timestamp_utc": "2026-08-14T14:09:42.515630+00:00Z"
+    },
+    "tx_ids_pilot.txt": {
+        "sha256": "ba363babcb73fdbe46d242a62832bda7f88a29672195a6d33333af20f7c10c77",
+        "timestamp_utc": "2026-08-14T14:09:42.515630+00:00Z"
+    },
+    "pilot_report.md": {
+        "sha256": "b6c66bc9f6df3182d07d020caffd381147cf8483750f22cddb0dea876c489261",
+        "timestamp_utc": "2026-08-14T14:09:42.516638+00:00Z"
+    },
+    "contract_app_id_testnet.txt": {
+        "sha256": "697bdee0d6866ecb1f775e33d7409b39042542a42d1a65c8a906169c497ea5af",
+        "timestamp_utc": "2026-08-14T14:09:42.516638+00:00Z"
+    }
+}

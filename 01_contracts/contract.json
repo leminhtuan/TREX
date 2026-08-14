@@ -1,0 +1,178 @@
+{
+    "name": "T-REX-Escrow",
+    "methods": [
+        {
+            "name": "create_app",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "attester_0"
+                },
+                {
+                    "type": "address",
+                    "name": "attester_1"
+                },
+                {
+                    "type": "address",
+                    "name": "attester_2"
+                },
+                {
+                    "type": "address",
+                    "name": "admin"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "opup",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "n"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "opt_in_asa",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "authorize",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "seller"
+                },
+                {
+                    "type": "uint64",
+                    "name": "amount_pay"
+                },
+                {
+                    "type": "uint64",
+                    "name": "amount_bounty"
+                },
+                {
+                    "type": "uint64",
+                    "name": "deadline_round"
+                },
+                {
+                    "type": "byte[32]",
+                    "name": "nonce"
+                },
+                {
+                    "type": "byte[32]",
+                    "name": "hash_q"
+                },
+                {
+                    "type": "byte[32]",
+                    "name": "hash_c"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "buyer_signature"
+                },
+                {
+                    "type": "axfer",
+                    "name": "axfer_usdc"
+                },
+                {
+                    "type": "pay",
+                    "name": "pay_algo"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "settle",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "session_id"
+                },
+                {
+                    "type": "byte[32]",
+                    "name": "hash_p"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "seller_signature"
+                },
+                {
+                    "type": "uint8",
+                    "name": "attester_index_1"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "attester_signature_1"
+                },
+                {
+                    "type": "uint8",
+                    "name": "attester_index_2"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "attester_signature_2"
+                },
+                {
+                    "type": "address",
+                    "name": "relayer"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "refund",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "session_id"
+                },
+                {
+                    "type": "uint8",
+                    "name": "reason"
+                },
+                {
+                    "type": "uint8",
+                    "name": "attester_index_1"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "attester_signature_1"
+                },
+                {
+                    "type": "uint8",
+                    "name": "attester_index_2"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "attester_signature_2"
+                },
+                {
+                    "type": "address",
+                    "name": "relayer"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}

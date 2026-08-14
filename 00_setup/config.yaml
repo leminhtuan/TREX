@@ -1,0 +1,17 @@
+network: "mainnet"
+algorand_node_url: "https://mainnet-api.algonode.cloud"
+usdc_asa_id: 10458941
+max_pilot_transactions: 20
+max_simulation_events: 10000
+max_capital_at_risk_usd: 10
+max_total_cost_usd: 10
+usdc_per_session: 500000
+algo_bounty_per_session: 500000
+deadline_rounds_offset: 100
+concurrent_sessions: 1
+adversarial_injection_rate: 0.20
+buyer_mnemonic: "TODO"
+seller_mnemonic: "TODO"
+attester_mnemonics: ["TODO", "TODO", "TODO"]
+relayer_mnemonic: "TODO"
+deployer_mnemonic: "TODO"

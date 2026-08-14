@@ -1,0 +1,262 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.9, pytest-8.2.2, pluggy-1.6.0
+rootdir: C:\Users\lemin\OneDrive\Desktop\trex-experiments\01_contracts
+plugins: anyio-4.14.2, cov-5.0.0
+collected 20 items
+
+test_integration_authorize.py EEEEEE                                     [ 30%]
+test_integration_settle.py EEEEEEE                                       [ 65%]
+test_integration_refund.py EEEEEE                                        [ 95%]
+test_integration_invariants.py E                                         [100%]
+
+=================================== ERRORS ====================================
+_________________ ERROR at setup of test_authorize_happy_path _________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+__________ ERROR at setup of test_authorize_invalid_buyer_signature ___________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+_______________ ERROR at setup of test_authorize_wrong_usdc_asa _______________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+__________ ERROR at setup of test_authorize_missing_grouped_transfer __________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+________________ ERROR at setup of test_authorize_reused_nonce ________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+_______________ ERROR at setup of test_authorize_malformed_hash _______________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+__________________ ERROR at setup of test_settle_happy_path ___________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+___________ ERROR at setup of test_settle_invalid_seller_signature ____________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+____________ ERROR at setup of test_settle_insufficient_signatures ____________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+___________ ERROR at setup of test_settle_duplicate_attester_index ____________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+_________________ ERROR at setup of test_settle_wrong_verdict _________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+______________ ERROR at setup of test_settle_deadline_violation _______________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+___________ ERROR at setup of test_settle_hash_commitment_mismatch ____________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+____________________ ERROR at setup of test_refund_timeout ____________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+_________________ ERROR at setup of test_refund_attested_fail _________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+______________ ERROR at setup of test_terminality_after_released ______________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+______________ ERROR at setup of test_terminality_after_refunded ______________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+_________________ ERROR at setup of test_relayer_equals_buyer _________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+________________ ERROR at setup of test_relayer_equals_seller _________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+______________________ ERROR at setup of test_invariants ______________________
+
+localnet = <algosdk.v2client.algod.AlgodClient object at 0x0000021D7FAB3710>
+dispenser = Account(private_key='aUi2bffHQflWaqe5GNCDZ0+tcQRSRt49ty+tikYjFPG4hh3yPD8FaArV5jOlJ/nt6nyFFop2Wr6Ul43RopqjRA==', address='XCDB34R4H4CWQCWV4YZ2KJ7Z5XVHZBIWRJ3FVPUUS6G5DIU2UNCMJUSDLU')
+
+    @pytest.fixture(scope="function")
+    def deployer_account(localnet, dispenser):
+>       acct = get_account(localnet, "deployer", fund_with_algo_amount=100)
+E       TypeError: get_account() got an unexpected keyword argument 'fund_with_algo_amount'
+
+conftest.py:27: TypeError
+
+---------- coverage: platform win32, python 3.12.9-final-0 -----------
+Name             Stmts   Miss  Cover   Missing
+----------------------------------------------
+trex_escrow.py      77     22    71%   49, 52, 73, 92-93, 102-103, 128-149, 204, 221-225, 331-335, 429
+----------------------------------------------
+TOTAL               77     22    71%
+
+=========================== short test summary info ===========================
+ERROR test_integration_authorize.py::test_authorize_happy_path - TypeError: g...
+ERROR test_integration_authorize.py::test_authorize_invalid_buyer_signature
+ERROR test_integration_authorize.py::test_authorize_wrong_usdc_asa - TypeErro...
+ERROR test_integration_authorize.py::test_authorize_missing_grouped_transfer
+ERROR test_integration_authorize.py::test_authorize_reused_nonce - TypeError:...
+ERROR test_integration_authorize.py::test_authorize_malformed_hash - TypeErro...
+ERROR test_integration_settle.py::test_settle_happy_path - TypeError: get_acc...
+ERROR test_integration_settle.py::test_settle_invalid_seller_signature - Type...
+ERROR test_integration_settle.py::test_settle_insufficient_signatures - TypeE...
+ERROR test_integration_settle.py::test_settle_duplicate_attester_index - Type...
+ERROR test_integration_settle.py::test_settle_wrong_verdict - TypeError: get_...
+ERROR test_integration_settle.py::test_settle_deadline_violation - TypeError:...
+ERROR test_integration_settle.py::test_settle_hash_commitment_mismatch - Type...
+ERROR test_integration_refund.py::test_refund_timeout - TypeError: get_accoun...
+ERROR test_integration_refund.py::test_refund_attested_fail - TypeError: get_...
+ERROR test_integration_refund.py::test_terminality_after_released - TypeError...
+ERROR test_integration_refund.py::test_terminality_after_refunded - TypeError...
+ERROR test_integration_refund.py::test_relayer_equals_buyer - TypeError: get_...
+ERROR test_integration_refund.py::test_relayer_equals_seller - TypeError: get...
+ERROR test_integration_invariants.py::test_invariants - TypeError: get_accoun...
+============================= 20 errors in 7.42s ==============================

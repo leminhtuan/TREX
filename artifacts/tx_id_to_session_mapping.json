@@ -1,0 +1,186 @@
+{
+  "54": {
+    "tx_ids": [
+      "ALUNUUN25IU7MU7UM7AB2PR6QAP7XFUTYEF5CMD2GKQFOZZAWWIA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "55": {
+    "tx_ids": [
+      "3GVZBZDQJI7QQ7MNF7S667FKALIW65ONOKZXZBV4WHRNR6UW22OA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "56": {
+    "tx_ids": [
+      "7EUDTDI7ZXXYTFNWJWZTXTIS34HXW7BWLTU37KQALU6V7ZM6XIFA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "57": {
+    "tx_ids": [
+      "5CAU74BYG3LA7O7WSASOBVXHBJZHA7WVWB7ACJBW52LXN2XEBKLA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "58": {
+    "tx_ids": [
+      "2XA2E4ZOXJWTVQ337DGR55T23NW5QYVOAVRG5RCB74W4ZAU6BCOA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "59": {
+    "tx_ids": [
+      "UKJINAXUAAPNLBLNJP7X744BSVNEIAWUTAEK74ZSRDHLRWON7VIA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "60": {
+    "tx_ids": [
+      "POUS2FQJXJ2HVWN6B4DAPHEHJBCM67UNNN4EWTNREAKR647GNNKA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "61": {
+    "tx_ids": [
+      "VEC4CPGZEFLPP46FSK4DP5JP27EVRRJDHRLPHPH443UEWBW2XQYA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "62": {
+    "tx_ids": [
+      "4IXALB24KN4Y54MK22EBCAGSA4C5GYN3BM7HFDMLSV64INDY53NQ"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "63": {
+    "tx_ids": [
+      "BJD7SYRJC5AEDHTEQ7JUYKWUHJCEZCGOJCYXP6CUTEKBX3AHU37A"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "64": {
+    "tx_ids": [
+      "HSDDIJ3M7V5KHSY4Y4WKQSA4F2TG65LPCTLSBMWXWMTTLSNFIV7A"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "65": {
+    "tx_ids": [
+      "ICTVGEP77UNRI2B6Q3UIQS265OZ4O5PBOQMREG3QSHUEAX5WKHCA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "66": {
+    "tx_ids": [
+      "TSOL5BPTCTGEEGUDCQMCYGPY4LRCXSY2IZHV6FSUVMCGEJCIAEIA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "67": {
+    "tx_ids": [
+      "POAQNMO7NIUMPJ4F4VL2QO4K6SEHS2VDD4DP5UIOZZS4CEVCSLSQ"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "68": {
+    "tx_ids": [
+      "6W5MHXFO5IYUKFYCLOLWCFFJ4773IL2VBCGUJYFOKCDAVZMAPYJQ"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "69": {
+    "tx_ids": [
+      "HGYRHLJALD4ZW4DHB23URSH7X4PXU6BSWXHXWBWFDF2BZSOGO2NA"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "70": {
+    "tx_ids": [
+      "RIUF64XIQ3QAFE5YV2NF2YQZMHO5PO3YDDOEMRREK43W2J2YMNLQ"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "71": {
+    "tx_ids": [
+      "QIGAZZHLNGICG2PN6FGFGVB3TXJJ5NXLGMBXTKIEMTA5SLJY4X7Q"
+    ],
+    "mapping_status": "VERIFIED",
+    "evidence_files": [
+      "transactions.csv:tx_id"
+    ]
+  },
+  "19": {
+    "tx_ids": [
+      "WTU45SX23O7P6PSQDTNUBC77RLMREA7ZEQ5G5CGTSXEPIRYQLJGA",
+      "SKFUAZ6255YOAJA7AXFM2Q7E3NZKVKD6CUPV3QCFCTLXRJJU7EUA",
+      "QDCKFYWFF7FOTRO7SCEVX3XWYCCXNXMHRJJOC5EUU5M243MZIT5Q"
+    ],
+    "mapping_status": "INFERRED",
+    "evidence_files": [
+      "Sequential inference based on run_pilot.py retry logic"
+    ]
+  },
+  "20": {
+    "tx_ids": [
+      "LJ7QGICGXFBAYLYOPWNVJNTGDQCTQEQPT7JBFCZWQTIXRQA7GJ7Q",
+      "YBMUSZ57OWFYORG5ISSU7F4MDDUE56VW4LPQXWCJRDLLMYQG4VZA",
+      "IOPCNN656TX6BAPVLXFG77TVUOKSJWCH6WTKF43NTNMQLDO3TWNA"
+    ],
+    "mapping_status": "INFERRED",
+    "evidence_files": [
+      "Sequential inference based on run_pilot.py retry logic"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+    "timestamp_utc": "2026-08-14T11:09:17.069878",
+    "network": "testnet",
+    "app_id": 769248116,
+    "deploy_tx_id": "BULKMXVYFO4RTF2GAYHDR343NLXEMQ3TTAVBEBIQLVMTKKMVCNHA",
+    "source_sha256": "a40f76be4d77291f4ea9b5f5d289c5cf839bfba40f14c2e6be3a61f336664ccf",
+    "teal_sha256": "c51aa4a4c8affc932086248dd9d6de4af09b939aacaae1804ae391f9ddb32a28",
+    "python_version": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]",
+    "usdc_asa_id": 31566704
+}

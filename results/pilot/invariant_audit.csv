@@ -1,0 +1,61 @@
+session_id,invariant,result,evidence
+54,Mutual Exclusivity,PASS,transactions.csv:outcome
+54,Conservation,PASS,transactions.csv:outcome
+54,Single Payout,PASS,transactions.csv:outcome
+55,Mutual Exclusivity,PASS,transactions.csv:outcome
+55,Conservation,PASS,transactions.csv:outcome
+55,Single Payout,PASS,transactions.csv:outcome
+56,Mutual Exclusivity,PASS,transactions.csv:outcome
+56,Conservation,PASS,transactions.csv:outcome
+56,Single Payout,PASS,transactions.csv:outcome
+57,Mutual Exclusivity,PASS,transactions.csv:outcome
+57,Conservation,PASS,transactions.csv:outcome
+57,Single Payout,PASS,transactions.csv:outcome
+58,Mutual Exclusivity,PASS,transactions.csv:outcome
+58,Conservation,PASS,transactions.csv:outcome
+58,Single Payout,PASS,transactions.csv:outcome
+59,Mutual Exclusivity,PASS,transactions.csv:outcome
+59,Conservation,PASS,transactions.csv:outcome
+59,Single Payout,PASS,transactions.csv:outcome
+60,Mutual Exclusivity,PASS,transactions.csv:outcome
+60,Conservation,PASS,transactions.csv:outcome
+60,Single Payout,PASS,transactions.csv:outcome
+61,Mutual Exclusivity,PASS,transactions.csv:outcome
+61,Conservation,PASS,transactions.csv:outcome
+61,Single Payout,PASS,transactions.csv:outcome
+62,Mutual Exclusivity,PASS,transactions.csv:outcome
+62,Conservation,PASS,transactions.csv:outcome
+62,Single Payout,PASS,transactions.csv:outcome
+63,Mutual Exclusivity,PASS,transactions.csv:outcome
+63,Conservation,PASS,transactions.csv:outcome
+63,Single Payout,PASS,transactions.csv:outcome
+64,Mutual Exclusivity,PASS,transactions.csv:outcome
+64,Conservation,PASS,transactions.csv:outcome
+64,Single Payout,PASS,transactions.csv:outcome
+65,Mutual Exclusivity,PASS,transactions.csv:outcome
+65,Conservation,PASS,transactions.csv:outcome
+65,Single Payout,PASS,transactions.csv:outcome
+66,Mutual Exclusivity,PASS,transactions.csv:outcome
+66,Conservation,PASS,transactions.csv:outcome
+66,Single Payout,PASS,transactions.csv:outcome
+67,Mutual Exclusivity,PASS,transactions.csv:outcome
+67,Conservation,PASS,transactions.csv:outcome
+67,Single Payout,PASS,transactions.csv:outcome
+68,Mutual Exclusivity,PASS,transactions.csv:outcome
+68,Conservation,PASS,transactions.csv:outcome
+68,Single Payout,PASS,transactions.csv:outcome
+69,Mutual Exclusivity,PASS,transactions.csv:outcome
+69,Conservation,PASS,transactions.csv:outcome
+69,Single Payout,PASS,transactions.csv:outcome
+70,Mutual Exclusivity,PASS,transactions.csv:outcome
+70,Conservation,PASS,transactions.csv:outcome
+70,Single Payout,PASS,transactions.csv:outcome
+71,Mutual Exclusivity,PASS,transactions.csv:outcome
+71,Conservation,PASS,transactions.csv:outcome
+71,Single Payout,PASS,transactions.csv:outcome
+19,Mutual Exclusivity,NOT_VERIFIABLE,missing terminal state
+19,Conservation,NOT_VERIFIABLE,missing terminal state
+19,Single Payout,NOT_VERIFIABLE,missing terminal state
+20,Mutual Exclusivity,NOT_VERIFIABLE,missing terminal state
+20,Conservation,NOT_VERIFIABLE,missing terminal state
+20,Single Payout,NOT_VERIFIABLE,missing terminal state

@@ -1,0 +1,35 @@
+{
+  "audit_timestamp_utc": "2026-08-14T14:21:48.097354+00:00",
+  "python_version": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]",
+  "script_sha256": "c1eb7fde23ee031a292685de37c1ffecbcd76853b640c4ab1d6f8c9d5c9136ca",
+  "inputs": {
+    "transactions.csv": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\results\\pilot\\transactions.csv",
+      "sha256": "6945e3b086d40903a2164d5bac0049a6c34b3a1390b08b8d46040937dbae46c8"
+    },
+    "algo_usd_price.csv": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\results\\pilot\\algo_usd_price.csv",
+      "sha256": "63b506d4b2d2903dad5c7eea1bb0503df0e7eff92ab15ecd44052922974b828e"
+    },
+    "tx_ids_pilot.txt": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\artifacts\\tx_ids_pilot.txt",
+      "sha256": "ba363babcb73fdbe46d242a62832bda7f88a29672195a6d33333af20f7c10c77"
+    },
+    "pilot_report.md": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\results\\pilot\\pilot_report.md",
+      "sha256": "b6c66bc9f6df3182d07d020caffd381147cf8483750f22cddb0dea876c489261"
+    },
+    "contract_app_id_testnet.txt": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\artifacts\\contract_app_id_testnet.txt",
+      "sha256": "697bdee0d6866ecb1f775e33d7409b39042542a42d1a65c8a906169c497ea5af"
+    },
+    "config.yaml": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\00_setup\\config.yaml",
+      "sha256": "6c28bf55f0bfe327b7a87522af6604ff732e9aa1a4807e4eba9066efcd1ee18d"
+    },
+    "trex_escrow.py": {
+      "path": "C:\\Users\\lemin\\OneDrive\\Desktop\\trex-experiments\\01_contracts\\trex_escrow.py",
+      "sha256": "a40f76be4d77291f4ea9b5f5d289c5cf839bfba40f14c2e6be3a61f336664ccf"
+    }
+  }
+}
