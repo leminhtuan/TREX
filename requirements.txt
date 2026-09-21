@@ -1,0 +1,11 @@
+# T-REX Artifact Reproducibility Requirements
+# Target Python: 3.12+ / 3.14 compatible
+pyteal==0.26.1
+py-algorand-sdk==2.6.0
+pytest==8.2.2
+pytest-cov==5.0.0
+pandas>=2.2.0
+scipy>=1.14.0
+numpy>=1.26.0
+algokit-utils>=2.2.1
+algokit==1.12.0

@@ -22,22 +22,26 @@ class RelayerAgent:
         
         session_box = (self.app_id, b"session:" + to_uint64(session_id))
         
-        # Read the session box to extract the nonce
+        # Read the session box to extract the buyer and nonce
         import base64
+        import hashlib
         try:
             box_info = self.client.application_box_by_name(self.app_id, session_box[1])
             box_data = base64.b64decode(box_info['value'])
-            nonce = box_data[97:97+32]
-            nonce_box = (self.app_id, b"nonce:" + nonce)
+            buyer_bytes = box_data[1:33]
+            nonce_bytes = box_data[97:105]
+            nonce_box = (self.app_id, hashlib.new("sha512_256", b"T-REX-ACTIVE-NONCE" + buyer_bytes + nonce_bytes).digest())
+            spent_box = (self.app_id, hashlib.new("sha512_256", b"T-REX-SPENT" + self.app_id.to_bytes(8, "big") + buyer_bytes + nonce_bytes).digest())
         except Exception as e:
             raise ValueError(f"Failed to read session box: {e}")
         
         from algosdk.abi import Method
-        settle_method = Method.from_signature("settle(uint64,byte[32],byte[64],uint8,byte[64],uint8,byte[64],address)void")
+        settle_method = Method.from_signature("settle(uint64,address,byte[32],byte[64],uint8,byte[64],uint8,byte[64],address)void")
         
         app_args=[
             settle_method.get_selector(),
             session_id.to_bytes(8, "big"),
+            buyer_bytes,
             H_p,
             seller_signature,
             (attester_1["index"]).to_bytes(1, "big"),
@@ -53,7 +57,7 @@ class RelayerAgent:
             index=self.app_id,
             on_complete=transaction.OnComplete.NoOpOC,
             app_args=app_args,
-            boxes=[session_box, nonce_box],
+            boxes=[session_box, nonce_box, spent_box],
             foreign_assets=[config.USDC_ASA_ID],
             accounts=[config.SELLER_ADDR, self.addr]
         )
@@ -106,18 +110,21 @@ class RelayerAgent:
         
         session_box = (self.app_id, b"session:" + to_uint64(session_id))
         
-        # Read the session box to extract the nonce
+        # Read the session box to extract the buyer and nonce
         import base64
+        import hashlib
         try:
             box_info = self.client.application_box_by_name(self.app_id, session_box[1])
             box_data = base64.b64decode(box_info['value'])
-            nonce = box_data[97:97+32]
-            nonce_box = (self.app_id, b"nonce:" + nonce)
+            buyer_bytes = box_data[1:33]
+            nonce_bytes = box_data[97:105]
+            nonce_box = (self.app_id, hashlib.new("sha512_256", b"T-REX-ACTIVE-NONCE" + buyer_bytes + nonce_bytes).digest())
+            spent_box = (self.app_id, hashlib.new("sha512_256", b"T-REX-SPENT" + self.app_id.to_bytes(8, "big") + buyer_bytes + nonce_bytes).digest())
         except Exception as e:
             raise ValueError(f"Failed to read session box: {e}")
         
         from algosdk.abi import Method
-        refund_method = Method.from_signature("refund(uint64,uint8,uint8,byte[64],uint8,byte[64],address)void")
+        refund_method = Method.from_signature("refund(uint64,address,uint8,uint8,byte[64],uint8,byte[64],address)void")
         
         # If timeout, attesters can be dummy
         if not attester_1:
@@ -133,6 +140,7 @@ class RelayerAgent:
             app_args=[
                 refund_method.get_selector(),
                 session_id.to_bytes(8, "big"),
+                buyer_bytes,
                 reason.to_bytes(1, "big"),
                 (attester_1["index"]).to_bytes(1, "big"),
                 attester_1["signature"],
@@ -140,7 +148,7 @@ class RelayerAgent:
                 attester_2["signature"],
                 encoding.decode_address(self.addr)
             ],
-            boxes=[session_box, nonce_box],
+            boxes=[session_box, nonce_box, spent_box],
             foreign_assets=[config.USDC_ASA_ID],
             accounts=[config.BUYER_ADDR, self.addr]
         )

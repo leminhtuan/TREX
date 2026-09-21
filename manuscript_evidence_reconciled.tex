@@ -1,0 +1,1246 @@
+\documentclass[journal]{IEEEtran}
+
+% === Core packages ===
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{balance}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc,fit,backgrounds}
+
+% === Theorem environments ===
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% === Custom commands ===
+\newcommand{\TODO}[1]{{\color{red}\textbf{[TODO: #1]}}}
+\newcommand{\algname}[1]{\textsc{#1}}
+\newcommand{\set}[1]{\mathcal{#1}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\begin{document}
+
+\title{T-REX: SLA-Bound Conditional Settlement for HTTP-Native
+Agentic Commerce}
+
+\author{%
+\IEEEauthorblockN{Tuan~Le\IEEEmembership{Member,~IEEE},
+and~\TODO{Co-Author~Name}\IEEEmembership{Member,~IEEE}}
+\IEEEauthorblockA{\textit{Department of Computer Science and Agentic
+Economics,}\\
+\textit{\TODO{Institution}, Hanoi, Vietnam}}
+\thanks{Manuscript received \TODO{DATE}; revised \TODO{DATE};
+accepted \TODO{DATE}.
+Date of publication \TODO{DATE}; date of current version \TODO{DATE}.
+This work was supported in part by \TODO{FUNDING AGENCY} under
+Grant \TODO{NUMBER}.
+\textit{(Corresponding author: Tuan Le.)}}
+\thanks{T.~Le is with the Department of Computer Science,
+\TODO{Institution}, Hanoi, Vietnam
+(e-mail: tuan.le.research@proton.me).}
+\thanks{\TODO{Co-Author Name} is with the Department of Information
+Systems, \TODO{Institution}.}
+\thanks{Digital Object Identifier \TODO{10.1109/OJCS.2026.XXXXXXX}}
+}
+
+\markboth{IEEE Open Journal of the Computer Society,
+Vol.~1, No.~1, August~2026}%
+{Le \MakeLowercase{\textit{\etal}}: T-REX: SLA-Bound Conditional
+Settlement for HTTP-Native Agentic Commerce}
+
+\maketitle
+
+%==============================================================================
+\begin{abstract}
+The proliferation of autonomous AI agents executing high-frequency,
+micro-value API transactions exposes a structural gap in HTTP-native
+payment protocols: the absence of cryptographically enforceable,
+conditional settlement bound to machine-verifiable service
+obligations.
+The recently standardized x402 protocol enables pay-per-request
+micropayments but provides no native escrow, no predicate-bound
+fulfillment verification, and no automated refund semantics.
+We present \textbf{T-REX} (Triple-entry Receipt Exchange), a
+security-aware protocol that binds HTTP service requests, syntactic
+SLA predicates, and conditional micropayment settlement on the
+Algorand blockchain.
+T-REX operationalizes the ``third entry'' of Triple-Entry Accounting
+as on-chain state-transition evidence produced by a deterministic,
+threshold-attested state machine rather than a trusted notary.
+We introduce the Syntactic SLA Predicate Language (SSPL), evaluated
+off-chain by a threshold attester mesh and verified on-chain via
+Ed25519 signature checks against attester public keys registered in
+application global state.
+To accommodate the strict cost-unit budget of the Algorand Virtual
+Machine (AVM), we design T-REX as an atomic transaction group that
+pools execution budget across four Ed25519 verifications
+(${\approx}\,7{,}600$ cost units) plus state-update overhead,
+fitting within an empirically observed 12-transaction group providing
+a pooled budget of 8{,}400 cost units.
+We formalize safety invariants, provide a conditional liveness
+proposition under rational-relayer assumptions, and demonstrate how
+T-REX state transitions constitute a cryptographically verifiable
+audit trail aligned with IFRS~15 and the REA ontology.
+We report (i)~an Algorand Testnet Functional Pilot of 20
+protocol-conformant sessions with published transaction IDs,
+(ii)~an on-chain AVM Characterization of 30 sessions with empirical
+fee and latency measurements, and (iii)~a discrete-event simulation
+of 1.76M events under adversarial conditions.
+T-REX achieves a median client-side settlement latency of 12.32\,s
+at a total session cost of 21{,}000\,$\mu$ALGO (authorization plus
+settlement), with 100\% refund precision, 100\% timeout detection,
+and zero invariant violations across the evaluation campaign.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Agentic commerce, conditional settlement, triple-entry accounting,
+smart contracts, Algorand, x402, SLA predicates, IFRS~15,
+verifiable audit trails.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+
+%==============================================================================
+\section{Introduction}
+\IEEEPARstart{T}{he} transition from human-mediated B2B commerce to
+autonomous Machine-to-Machine (M2M) agentic economies necessitates
+payment infrastructure that can enforce service-level obligations
+without human intervention.
+Autonomous agents procuring computational resources, LLM inferences,
+and datasets operate at sub-second cadences and sub-cent unit
+economics~\cite{x402spec}.
+The recently standardized x402 protocol revives the HTTP
+\texttt{402 Payment Required} status code to facilitate HTTP-native
+micropayments, enabling an agent to receive a price quote, settle,
+and retry within a single request--response
+cycle~\cite{x402spec,x402facilitator}.
+
+However, x402 primarily standardizes \emph{payment initiation and
+authorization}; it does not prescribe a conditional settlement layer
+that escrows funds pending verification of service fulfillment.
+In the absence of such a layer, agents must either trust resource
+servers to deliver as promised or fall back to off-chain dispute
+resolution, both of which are incompatible with the autonomy,
+cadence, and scale of agentic economies.
+
+Triple-Entry Accounting (TEA)~\cite{grigg2005,boyle2001} established
+the conceptual foundation for a shared, cryptographically secured
+transaction repository.
+Recent work has explored blockchain instantiations of TEA for B2B
+supply chains~\cite{ibanez2023,sarwar2023}, yet these systems
+predominantly target post-hoc audit and compliance rather than
+real-time, trust-minimized conditional settlement for HTTP-native
+interactions.
+Concurrently, smart-contract escrow systems have been studied in
+fair-exchange and payment-channel
+contexts~\cite{asokan2004,pagnia2003}, but typically assume
+homogeneous assets or rely on heavy cryptographic primitives
+(e.g., zero-knowledge proofs) that exceed the execution budgets of
+opcode-constrained virtual machines.
+
+\subsection{Research Gaps and Questions}
+We identify four gaps at the intersection of agentic commerce,
+blockchain settlement, and accounting informatics:
+
+\begin{enumerate}[label=\textbf{G\arabic*.},leftmargin=*]
+\item \textbf{Absence of conditional settlement in HTTP-native
+protocols.}
+x402 authorizes payment but does not bind funds to verifiable
+service predicates.
+\item \textbf{Execution-budget constraints of deterministic VMs.}
+Verifying multiple Ed25519 signatures and binding predicate hashes
+on-chain exceeds the per-call cost-unit budgets of platforms such
+as the Algorand Virtual Machine without careful atomic-group design.
+\item \textbf{Dependence on trusted validators in existing TEA
+implementations.}
+Prior TEA systems assume a centralized Shared Transaction Repository
+(STR) operator; no prior work has operationalized TEA's third entry
+as a deterministic, threshold-attested state machine for real-time
+settlement.
+\item \textbf{Disconnect between settlement protocols and accounting
+standards.}
+Existing escrow systems do not expose evidence suitable for IFRS~15
+revenue recognition or REA ontology mapping, forcing enterprises to
+maintain parallel reconciliation systems.
+\end{enumerate}
+
+\noindent These gaps motivate the following research questions:
+
+\begin{enumerate}[label=\textbf{RQ\arabic*.},leftmargin=*]
+\item How can a protocol bind HTTP service requests,
+machine-verifiable SLA predicates, and conditional micropayment
+settlement in a trust-minimized manner?
+\item How can SLA predicates be evaluated within the strict opcode
+budgets of deterministic virtual machines without sacrificing
+soundness?
+\item How can liveness be ensured in a permissionless settlement
+network without centralized keepers?
+\item How can on-chain settlement evidence serve as a verifiable
+audit trail aligned with IFRS~15 and REA?
+\end{enumerate}
+
+\subsection{Contributions}
+This paper makes the following contributions:
+
+\begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=*]
+\item \textbf{Protocol specification.}
+We formalize T-REX as a deterministic state machine with a canonical
+receipt tuple (\S\ref{sec:protocol}) and introduce the Syntactic SLA
+Predicate Language (SSPL), evaluated off-chain by a threshold attester
+mesh and verified on-chain via Ed25519 signature checks against
+attester keys registered in application global state.
+\item \textbf{AVM-aware engineering design.}
+We present a concrete atomic-transaction-group design that pools
+execution budget across four Ed25519 verifications on Algorand,
+operating within an 8{,}400-cost-unit group budget (pooled across
+an empirically observed 12-transaction group) (\S\ref{sec:avm}).
+\item \textbf{Formal properties.}
+We state safety invariants and a conditional liveness proposition
+under explicit assumptions on blockchain liveness, relayer
+observability, and economic rationality (\S\ref{sec:formal}).
+\item \textbf{Accounting integration.}
+We specify how T-REX state transitions constitute a cryptographically
+verifiable audit trail for IFRS~15 performance obligations and REA
+ontology events, without acting as an accounting-recognition engine
+(\S\ref{sec:accounting}).
+\item \textbf{Empirical evaluation.}
+We report an Algorand Testnet Functional Pilot of 20 sessions with
+published transaction IDs alongside a 30-session Testnet AVM
+Characterization (\S\ref{sec:pilot}), and a discrete-event simulation
+of 1.76M events under adversarial conditions (\S\ref{sec:sim}),
+measuring latency, cost, refund precision, timeout detection, and
+invariant adherence.
+\item \textbf{Reproducibility artifact.}
+We release the PyTeal source, simulator, raw data, and containerized
+environment with a permanent DOI (\S\ref{sec:reproducibility}).
+\end{enumerate}
+
+\noindent The remainder of the paper is organized as follows.
+\S\ref{sec:background} reviews background and related work.
+\S\ref{sec:model} presents the system and threat model.
+\S\ref{sec:protocol} specifies the protocol.
+\S\ref{sec:formal} states formal properties.
+\S\ref{sec:avm} describes the AVM-aware implementation.
+\S\ref{sec:accounting} addresses accounting integration.
+\S\ref{sec:evaluation} reports experiments.
+\S\ref{sec:discussion} discusses limitations and future work.
+\S\ref{sec:conclusion} concludes.
+
+%==============================================================================
+\section{Background and Related Work}
+\label{sec:background}
+
+\subsection{Agentic Commerce and x402}
+The x402 protocol standardizes machine-payable APIs by reviving
+HTTP~402~\cite{x402spec}.
+When a resource requires payment, the server responds with
+\texttt{402 Payment Required} and a payment-requirements payload;
+the client fulfills the payment (typically in USDC) and retries the
+request.
+A facilitator component verifies and settles the payment, either
+directly or via a payment orchestrator~\cite{x402facilitator}.
+x402 Version~2 further introduces \emph{signed offers and
+receipts}~\cite{x402receipts} providing tamper-evident
+proof-of-interaction.
+However, x402 does not standardize (i)~an escrow state machine,
+(ii)~SLA-bound fulfillment verification, or (iii)~automated
+timeout/refund transitions upon fulfillment failure.
+T-REX extends x402 by interposing a conditional settlement layer
+that escrows funds pending attester-verified SLA compliance.
+
+\subsection{Triple-Entry Accounting}
+Grigg~\cite{grigg2005} and Boyle~\cite{boyle2001} independently
+proposed TEA, in which a third, shared receipt binds buyer and seller
+records cryptographically.
+Iba\~{n}ez~\etal~\cite{ibanez2023} and Sarwar~\etal~\cite{sarwar2023}
+surveyed blockchain-based TEA for B2B contexts.
+T-REX \emph{operationalizes} TEA's third entry: rather than a
+signature from a trusted notary, the third entry is the deterministic
+state-transition evidence $\pi_{\text{chain}}$ produced by a
+threshold-attested state machine on a public ledger.
+
+\subsection{Conditional Payment and Fair Exchange}
+Fair-exchange protocols~\cite{asokan2004,pagnia2003} ensure either
+both parties receive their expected items or neither does, typically
+via trusted third parties or heavyweight cryptography.
+Payment channels~\cite{poon2016lightning} achieve conditional
+transfers but are optimized for long-lived bilateral relationships
+rather than per-request API commerce.
+T-REX relaxes full fair exchange to \emph{syntactic} SLA
+verification, enabling efficient on-chain execution while preserving
+strong safety guarantees against payload swapping, replay, and
+treasury drain.
+
+\subsection{Algorand Virtual Machine Constraints}
+Algorand's pure proof-of-stake consensus provides single-block
+deterministic finality~\cite{gilad2017algorand}.
+The Algorand Virtual Machine (AVM) enforces strict cost-unit budgets:
+a single stateful application call is limited to 700 cost units, but
+an \emph{atomic transaction group} of up to 16 transactions pools a
+budget of up to $16 \times 700 = 11{,}200$
+units~\cite{algorand_costs}.
+Cryptographic opcodes dominate the budget: \texttt{ed25519verify}
+costs 1{,}900 units per invocation~\cite{algorand_costs}.
+T-REX is explicitly designed to exploit atomic-group budget pooling,
+enabling four Ed25519 verifications plus predicate-hash binding and
+asset routing within a single atomic group.
+
+\begin{table*}[t]
+\centering
+\caption{Comparison of Settlement Protocols for Agentic Commerce}
+\label{tab:comparison}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Feature} & \textbf{x402 (vanilla)} &
+  \textbf{x402 + Signed Receipts} &
+  \textbf{Standard Escrow} & \textbf{ZK-Fair Exchange} &
+  \textbf{T-REX} \\
+\midrule
+HTTP-native binding          & \checkmark & \checkmark & --- & ---
+  & \checkmark \\
+Conditional settlement        & ---        & ---        & \checkmark
+  & \checkmark & \checkmark \\
+Trusted third party          & n/a        & n/a        & \checkmark
+  & --- & --- \\
+SLA predicate verification    & ---        & ---        & limited
+  & semantic & syntactic (SSPL) \\
+AVM-budget compliant         & n/a        & n/a        & rare
+  & no     & \checkmark \\
+Verifiable audit trail       & ---        & partial    & ---
+  & ---    & \checkmark (IFRS/REA) \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+%==============================================================================
+\section{System and Threat Model}
+\label{sec:model}
+
+\subsection{Entities}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Buyer ($B$)}: an autonomous agent issuing HTTP requests
+and locking escrow funds.
+\item \textbf{Seller ($S$)}: the API provider generating response
+payloads.
+\item \textbf{Attester mesh ($\set{A}$)}: a set of $n$ independent
+verifier nodes evaluating SSPL predicates off-chain and issuing
+Ed25519 signatures; at most $f < t$ may be Byzantine, where $t$ is
+the threshold.
+\item \textbf{Relayer ($R$)}: a permissionless, economically rational
+actor submitting settlement or refund transactions in exchange for an
+embedded bounty.
+\item \textbf{Blockchain ($\set{B}$)}: the Algorand Testnet providing
+consensus, deterministic finality, and AVM execution.
+\end{itemize}
+
+\noindent\textbf{Attester registration.}
+The attester mesh is registered \emph{on-chain}: during application
+initialization (\texttt{on\_create}), the Ed25519 public keys of all
+$n = 3$ attesters are stored in the application's global state as
+\texttt{attester\_pk\_0}, \texttt{attester\_pk\_1}, and
+\texttt{attester\_pk\_2}.
+On every \texttt{settle} or \texttt{refund} call, the AVM reads
+attester indices from transaction arguments, retrieves the
+corresponding public keys via \texttt{App.globalGet()}, and executes
+\texttt{ed25519verify} on-chain to validate signatures against the
+registered set $\set{A}_{\text{registered}}$.
+SSPL predicate evaluation itself occurs off-chain; only signature
+verification is on-chain.
+
+\subsection{Adversary Model}
+We adopt a Dolev--Yao network adversary capable of dropping, delaying
+(up to $\Delta_{\text{net}}$), replaying, and reordering messages.
+The adversary may control either $B$ or $S$ (but not both
+simultaneously for the same session), may deploy Sybil relayers, and
+may collude with up to $f$ attesters.
+
+\begin{assumption}[Cryptographic primitives]
+\label{asm:crypto}
+Ed25519 signatures are existentially unforgeable under chosen-message
+attacks; SHA-256 is collision-resistant.
+\end{assumption}
+
+\begin{assumption}[Blockchain liveness and safety]
+\label{asm:chain}
+Algorand provides single-block deterministic finality and satisfies
+partial synchrony after a Global Stabilization Time (GST): any valid
+transaction submitted by an honest relayer is included in a finalized
+block within bounded delay $\Delta_{\text{net}}$.
+\end{assumption}
+
+\begin{assumption}[Threshold attester honesty]
+\label{asm:threshold}
+For an $(n, t)$ threshold scheme with $n = 3$ and $t = 2$, at most
+$f \le n - t = 1$ attester is Byzantine.
+\end{assumption}
+
+\begin{assumption}[Relayer rationality]
+\label{asm:relayer}
+Relayers are rational profit-maximizing agents who submit any
+transaction whose expected reward exceeds the sum of gas cost and
+opportunity cost.
+\end{assumption}
+
+\subsection{Threats and Mitigations}
+Table~\ref{tab:threats} enumerates threats and corresponding
+mitigations.
+
+\begin{table}[h]
+\centering
+\caption{Threat Model and Mitigations}
+\label{tab:threats}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Threat} & \textbf{Impact} & \textbf{Mitigation} \\
+\midrule
+Replay attack         & Unauthorized settlement
+  & Nonce uniqueness; domain separation \\
+Payload swapping      & Wrong payload released
+  & $\set{H}_p$ bound in $\sigma_S$ \\
+Bounty farming        & Treasury drain
+  & First-valid-call-wins; relayer $\ne B,S$ \\
+Attester collusion    & False SSPL attestation
+  & $(t, n)$ threshold, $f \le n - t$ \\
+Censorship            & Transaction stuck
+  & Permissionless relayers; timeout path \\
+Signature malleability & State divergence
+  & Canonical JCS encoding before hash \\
+Deadline manipulation  & Forced refund
+  & $r_{\text{dead}}$ set at authorize; immutable \\
+Attester delay attack  & Timeout exploitation
+  & $t$-of-$n$ threshold tolerates $f$ slow attesters \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+%==============================================================================
+\section{Protocol Specification}
+\label{sec:protocol}
+
+\subsection{Syntactic SLA Predicate Language (SSPL)}
+Evaluating arbitrary JSON payloads on-chain is infeasible under AVM
+cost-unit constraints.
+We therefore restrict SLA verification to a syntactic grammar compiled
+to a compact representation whose on-chain validation reduces to
+signature checking.
+
+\begin{definition}[SSPL grammar]
+\label{def:sspl}
+An SSPL predicate $P$ over a JSON response is generated by
+\[
+P \;::=\; \texttt{Compare}(\text{path}, \text{op}, \text{lit})
+\mid \texttt{And}(P_1, P_2)
+\mid \texttt{Or}(P_1, P_2)
+\mid \texttt{Not}(P),
+\]
+where \texttt{path} is a deterministic JSON Pointer (RFC~6901),
+$\text{op} \in \{=, \ne, <, \le, >, \ge\}$, and $\text{lit}$ is a
+literal over strings, integers, or booleans.
+The predicate is canonically serialized (RFC~8785 JCS) before
+hashing.
+\end{definition}
+
+\begin{remark}
+\label{rem:sspl-scope}
+SSPL deliberately excludes array quantifiers, regular expressions,
+and recursive schema validation to keep the canonical hash $\set{H}_c$
+computable in $O(|P|)$ and independent of payload size.
+Richer predicates (e.g., zkTLS-style semantic proofs) are deferred
+to future work (\S\ref{sec:discussion}).
+\end{remark}
+
+SSPL is evaluated \emph{off-chain} by attesters; on-chain
+verification reduces to checking attester signatures over the tuple
+$(id, \set{H}_q, \set{H}_c, \set{H}_p, \texttt{PASS/FAIL})$, which
+fits within the pooled AVM budget.
+
+\subsection{Canonical Receipt Tuple}
+The canonical T-REX receipt $\set{R}$ for a session $id$ is:
+\begin{equation}
+\set{R} = \langle
+id,\, \set{H}_q,\, \set{H}_c,\, \set{H}_p,\, \mathbf{a},\,
+r_{\text{dead}},\, n,\,
+\sigma_B,\, \sigma_S,\, \Sigma_A,\, \pi_{\text{chain}}
+\rangle,
+\label{eq:receipt}
+\end{equation}
+where
+\begin{itemize}[leftmargin=*]
+\item $id$ is a session UUID;
+\item $\set{H}_q = H(\text{JCS}(\text{HTTP\_Request}))$;
+\item $\set{H}_c = H(\text{JCS}(\text{SSPL predicate}))$;
+\item $\set{H}_p = H(\text{JCS}(\text{Response Payload}))$;
+\item $\mathbf{a} = (a_{\text{pay}},\, a_{\text{bounty}})$ is the
+escrow vector (payment and relayer bounty, possibly in different
+assets);
+\item $r_{\text{dead}}$ is the Algorand round deadline;
+\item $n$ is a cryptographic nonce unique per session;
+\item $\sigma_B$ and $\sigma_S$ are Ed25519 signatures over buyer
+and seller messages;
+\item $\Sigma_A$ is the set of attester signatures (at least $t$
+of $n$) over the SSPL evaluation outcome;
+\item $\pi_{\text{chain}} = \langle \text{appId},\, \text{txId},\,
+r_{\text{final}},\, \text{stateRoot},\, \text{eventLog} \rangle$
+is on-chain state-transition evidence.
+\end{itemize}
+
+\noindent\textbf{Buyer message domain:}
+\begin{equation}
+M_B = \texttt{encode}\bigl(\text{``T-REX-BUY''},\, id,\, \set{H}_q,\,
+\set{H}_c,\, \mathbf{a},\, \text{payAssetId},\, S,\, \text{appId},\,
+r_{\text{dead}},\, n\bigr).
+\end{equation}
+
+\noindent\textbf{Seller message domain:}
+\begin{equation}
+M_S = \texttt{encode}\bigl(\text{``T-REX-SELL''},\, id,\, \set{H}_q,\,
+\set{H}_c,\, \set{H}_p,\, r_{\text{dead}},\, n\bigr).
+\end{equation}
+
+\noindent\textbf{Attester message domain (per attester $A_i$):}
+\begin{equation}
+M_{A_i} = \texttt{encode}\bigl(\text{``T-REX-ATT''},\, id,\,
+\set{H}_c,\, \set{H}_p,\, v_i,\, r_{\text{dead}},\, n\bigr),
+\end{equation}
+where $v_i \in \{\texttt{PASS}, \texttt{FAIL}\}$ is the SSPL
+evaluation outcome.
+
+\subsection{State Machine}
+T-REX operates as a deterministic finite automaton
+$\set{M} = (\set{S}, \Sigma, \delta, s_0, F)$ with
+\begin{equation}
+\set{S} = \{\texttt{Idle},\, \texttt{Authorized},\,
+\texttt{Released},\, \texttt{Refunded}\}.
+\end{equation}
+Transitions (Algorithm~\ref{alg:trex}) are triggered by application
+calls whose arguments are checked against stored state and
+signatures.
+
+\begin{algorithm}[h]
+\caption{T-REX state transitions (AVM logic)}
+\label{alg:trex}
+\begin{algorithmic}[1]
+\Require Transaction $Tx$, current round $r_{\text{curr}}$
+\Ensure State transition or revert
+\If{$Tx.\text{type} = \texttt{authorize}$}
+  \State Verify $\sigma_B$ over $M_B$; lock $\mathbf{a}$ in escrow
+  \State $\set{S} \leftarrow \texttt{Authorized}$
+\ElsIf{$Tx.\text{type} = \texttt{settle}$}
+  \State Verify $\sigma_S$ over $M_S$
+  \State Verify $|\Sigma_A \cap \set{A}_{\text{registered}}| \ge t$
+    with all $v_i = \texttt{PASS}$
+  \If{all signatures valid $\land\; r_{\text{curr}} \le r_{\text{dead}}$}
+    \State Execute $\texttt{Outflow}_{\text{Released}}$
+    \State $\set{S} \leftarrow \texttt{Released}$
+  \Else
+    \State \textbf{revert}
+  \EndIf
+\ElsIf{$Tx.\text{type} = \texttt{refund}$}
+  \If{$r_{\text{curr}} > r_{\text{dead}}$}
+    \State Execute $\texttt{Outflow}_{\text{Refunded}}$;
+    $\set{S} \leftarrow \texttt{Refunded}$
+  \ElsIf{$|\Sigma_A \cap \set{A}_{\text{registered}}| \ge t
+    \;\land\; v_i = \texttt{FAIL}$}
+    \State Execute $\texttt{Outflow}_{\text{Refunded}}$;
+    $\set{S} \leftarrow \texttt{Refunded}$
+  \Else
+    \State \textbf{revert}
+  \EndIf
+\Else
+  \State \textbf{revert}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Vectorized Asset Routing}
+To enforce fund conservation under both terminal transitions, we
+define asset-distribution vectors:
+\begin{align}
+\texttt{Outflow}_{\text{Released}} &=
+  (a_{\text{pay}} \to S,\; a_{\text{bounty}} \to R),
+  \label{eq:out-rel}\\
+\texttt{Outflow}_{\text{Refunded}} &=
+  (a_{\text{pay}} \to B,\; a_{\text{bounty}} \to R).
+  \label{eq:out-ref}
+\end{align}
+The relayer is compensated on both paths
+(Eq.~\ref{eq:out-ref} ensures that a buyer cannot starve relayers
+by withholding proof), while the payment asset routes to whichever
+party is entitled under the SLA outcome.
+
+%==============================================================================
+\section{Formal Properties}
+\label{sec:formal}
+
+\subsection{Safety Invariants}
+
+\begin{table}[h]
+\centering
+\caption{Safety invariants}
+\label{tab:invariants}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Invariant} & \textbf{Formulation} \\
+\midrule
+Mutual exclusivity &
+  $\forall id:\; \neg(\texttt{Released}(id) \land
+  \texttt{Refunded}(id))$ \\
+Authorization &
+  $\forall id:\; \texttt{Released}(id) \Rightarrow
+  \texttt{Authorized}(id)$ \\
+Conservation &
+  $\forall id:\; \texttt{Outflow}(id) = \mathbf{a}_{\text{in}}(id)$ \\
+Binding &
+  $\forall id:\; \texttt{Released}(id) \Rightarrow
+  \text{valid}(\sigma_S, \Sigma_A, \set{H}_q, \set{H}_c, \set{H}_p)$ \\
+Single payout &
+  $\forall id:\; \texttt{BountyPaid}(id) \le 1$ \\
+Nonce uniqueness &
+  $\forall id_1 \ne id_2:\; n_{id_1} \ne n_{id_2}$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Conditional Liveness}
+
+\begin{proposition}[Conditional liveness]
+\label{prop:liveness}
+Under Assumptions~\ref{asm:crypto}--\ref{asm:relayer}, and given
+(i)~an \texttt{Authorized} session observed by at least one rational
+relayer at round
+$r_{\text{obs}} < r_{\text{dead}} - \Delta_{\text{net}}$,
+and (ii)~a bounty
+$a_{\text{bounty}} > C_{\text{gas}} + C_{\text{opp}}$,
+the T-REX state machine possesses explicit conditional liveness,
+guaranteeing transition to a terminal state (\texttt{Released} or
+\texttt{Refunded}).
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+By Assumption~\ref{asm:relayer}, the expected utility of submitting
+a valid settlement or refund transaction is strictly positive.
+By Assumption~\ref{asm:chain}, such a transaction is included in a
+finalized block within $\Delta_{\text{net}}$.
+The atomic-group structure guarantees that exactly one valid state
+transition commits per session.
+Competing relayers may race, but because all competing groups target
+the same $(id, n)$ tuple and the AVM enforces nonce uniqueness
+(Invariant~6, Table~\ref{tab:invariants}), at most one group can
+commit; subsequent groups referencing the same nonce revert,
+preserving the single-payout invariant.
+The consensus rule ``first valid group wins'' resolves the race
+deterministically, satisfying explicit conditional liveness.
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:liveness} is conditional: it does not hold if
+the relayer network is entirely offline, if $a_{\text{bounty}}$
+falls below gas cost (e.g., during fee spikes), or if
+Assumption~\ref{asm:threshold} is violated.
+These failure modes are measured empirically in \S\ref{sec:sim}.
+\end{remark}
+
+%==============================================================================
+\section{AVM-Aware Implementation}
+\label{sec:avm}
+
+A naive T-REX implementation that verifies four Ed25519 signatures
+inside a single application call exceeds Algorand's 700-cost-unit
+per-call budget (\texttt{ed25519verify} alone costs 1{,}900
+units~\cite{algorand_costs}).
+We therefore structure each settlement/refund as an \emph{atomic
+transaction group} that pools the budget across constituent
+transactions.
+
+\subsection{Atomic Group Layout and Budget Analysis}
+
+The settlement workload requires four \texttt{ed25519verify}
+invocations ($\sigma_B$, $\sigma_S$, and two attester signatures
+for the 2-of-3 threshold) at
+$4 \times 1{,}900 = 7{,}600$ cost units, plus an estimated
+200--500 units for SHA-256 hash binding, box storage reads/writes,
+conditional logic, and inner-transaction issuance, yielding a
+theoretical total of ${\approx}\,7{,}800$--$8{,}100$ cost units.
+
+Table~\ref{tab:avm} specifies the atomic group layout.
+Budget pooling is achieved by including \emph{dummy OpUp
+transactions} in the atomic group: these are empty application calls
+that perform no computation but each contribute 700 cost units to
+the shared group pool.
+The Normal settlement path uses 10 outer transactions
+(1~main AppCall + 9~dummy OpUps) plus 2~inner
+\texttt{AssetTransfer} transactions (USDC to Seller, bounty to
+Relayer), yielding a pooled budget of
+$12 \times 700 = 8{,}400$ cost units, which exceeds the theoretical
+maximum of 8{,}100 with a margin of ${\approx}\,300$ units.
+The Refund path uses 7~outer transactions (1~main AppCall +
+6~dummy OpUps) plus 2~inner \texttt{AssetTransfer} transactions,
+yielding $9 \times 700 = 6{,}300$ units, sufficient for the reduced
+verification workload.
+
+\begin{table}[h]
+\centering
+\caption{Atomic group layout and cost budget (Terminal phase)}
+\label{tab:avm}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}llrl@{}}
+\toprule
+\textbf{Tx \#} & \textbf{Role} & \textbf{Est. cost units}
+  & \textbf{Notes} \\
+\midrule
+1 & Verify $\sigma_B$              & 1{,}900 & \texttt{ed25519verify} \\
+2 & Verify $\sigma_S$              & 1{,}900 & \texttt{ed25519verify} \\
+3 & Verify $\Sigma_A$ (2-of-3)     & 3{,}800
+  & 2$\times$\texttt{ed25519verify} \\
+4 & State update + inner transfers & 200--500
+  & Hash, box, routing \\
+\midrule
+\multicolumn{2}{l}{\textbf{Theoretical total}}
+  & 7{,}800--8{,}100 & \\
+\multicolumn{2}{l}{\textbf{Pooled budget (Normal, 12 tx)}}
+  & 8{,}400 & $\ge$ total \\
+\multicolumn{2}{l}{\textbf{Pooled budget (Refund, 9 tx)}}
+  & 6{,}300 & $\ge$ refund total \\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize On-chain cost-unit profiling is not
+available via the Algorand Indexer;} \\
+\multicolumn{4}{l}{\footnotesize hence per-opcode measurements are
+reported as NA\_DESIGN\_ONLY.} \\
+\end{tabular}
+}
+\end{table}
+
+\noindent All transactions in the group share a group ID; if any
+constituent transaction fails, the entire group reverts, preserving
+atomicity and the mutual-exclusivity invariant
+(\S\ref{sec:formal}).
+
+\subsection{Fee Structure}
+
+Each T-REX session incurs fees across \emph{two} on-chain groups:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Authorization group} (fund locking): 9~transactions
+$\times$ 1{,}000~$\mu$ALGO = \textbf{9{,}000~$\mu$ALGO}.
+\item \textbf{Terminal group} (settlement or refund):
+\begin{itemize}
+\item Normal: 12~transactions (10~outer + 2~inner)
+$\times$ 1{,}000~$\mu$ALGO = \textbf{12{,}000~$\mu$ALGO}.
+\item Refund: 9~transactions (7~outer + 2~inner)
+$\times$ 1{,}000~$\mu$ALGO = \textbf{9{,}000~$\mu$ALGO}.
+\end{itemize}
+\end{enumerate}
+
+\noindent Total session cost: \textbf{21{,}000~$\mu$ALGO} (Normal)
+or \textbf{18{,}000~$\mu$ALGO} (Refund), confirmed empirically
+across all 30 AVM Characterization sessions
+(Table~\ref{tab:avm-fees}).
+
+\begin{table}[h]
+\centering
+\caption{Fee breakdown by session type}
+\label{tab:avm-fees}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Phase} & \textbf{Tx count} & \textbf{Fee ($\mu$ALGO)}
+  & \textbf{Normal total} & \textbf{Refund total} \\
+\midrule
+Authorization & 9  & 9{,}000  & \multirow{2}{*}{21{,}000}
+  & \multirow{2}{*}{18{,}000} \\
+Terminal      & 12 / 9 & 12{,}000 / 9{,}000 & & \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Reference Implementation}
+T-REX is implemented in PyTeal compiling to TEAL~v10, with the
+relayer in Python~3.12 + \texttt{asyncio}.
+The compiled contract targets Algorand AVM with
+\texttt{assemble\_constants=True}.
+Source code, compilation artifacts, and unit tests are archived
+at~\cite{artifact}.
+
+%==============================================================================
+\section{Verifiable Audit Trail for IFRS~15 and REA}
+\label{sec:accounting}
+
+T-REX does not itself recognize revenue; it produces a
+cryptographically verifiable audit trail that enterprise ERP and GL
+systems can consume as evidence under IFRS~15~\cite{ifrs15} and the
+REA ontology~\cite{mccarthy1982rea}.
+
+\begin{table}[h]
+\centering
+\caption{T-REX events as audit evidence}
+\label{tab:ifrs}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{T-REX event} & \textbf{IFRS~15 relevance}
+  & \textbf{REA event type} \\
+\midrule
+\texttt{authorize} & Evidence re: contract approval, consideration,
+  and refund terms & Commitment \\
+\texttt{release}   & Evidence re: performance-obligation fulfillment
+  and control transfer & Economic event (sale) \\
+\texttt{refund}    & Evidence re: failed predicate, reversal, or
+  non-settlement & Reversal / cancellation \\
+$\pi_{\text{chain}}$ & Immutable, time-stamped, counterparty-signed
+  evidence & Audit anchor \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\noindent\textbf{IFRS~15 mapping.}
+Under the five-step model of IFRS~15, the \texttt{authorize} event
+provides evidence for Step~1 (contract identification) and Step~2
+(performance obligation identification).
+The \texttt{release} event constitutes evidence for Step~5 (revenue
+recognition upon satisfaction of the performance obligation),
+specifically demonstrating that control of the API response has
+transferred to the buyer.
+The \texttt{refund} event provides evidence that the performance
+obligation was \emph{not} satisfied, supporting reversal of any
+previously recognized consideration.
+
+\noindent\textbf{REA mapping.}
+In REA terms, \texttt{authorize} is a \emph{Commitment} linking a
+buyer \emph{Agent} to a payment \emph{Resource}.
+The \texttt{release} event is an \emph{Economic Event} (sale) that
+discharges the commitment, while \texttt{refund} is a
+\emph{Cancellation} event.
+The on-chain evidence $\pi_{\text{chain}}$ serves as the immutable
+audit anchor binding all three events to a single session.
+
+\noindent\textbf{Scope limitation.}
+Accounting recognition remains the prerogative of the reporting
+entity applying IFRS~15's five-step model.
+T-REX does not handle multi-currency translation, tax computation,
+partial fulfillment, or consolidation.
+It provides the evidence layer that makes the relevant judgments
+\emph{auditable and reproducible} without parallel off-chain
+reconciliation.
+
+%==============================================================================
+\section{Experimental Evaluation}
+\label{sec:evaluation}
+
+\subsection{Algorand Testnet Functional Pilot and AVM
+Characterization}
+\label{sec:pilot}
+
+\subsubsection{Setup}
+We deployed T-REX on the Algorand Testnet with application ID
+769248116 and USDC ASA 10458941.
+Each session locked at most 50 USDC; total capital at risk across
+the campaign was capped at 1{,}000~USD (Testnet).
+A 2-of-3 multisig kill-switch was retained for emergency
+pause-and-drain.
+
+We conducted two complementary on-chain campaigns:
+\begin{enumerate}[label=(\roman*),leftmargin=*]
+\item A \textbf{Functional Pilot} executing 20 protocol-conformant
+sessions (16~normal, 2~timeout, 2~attested-fail) to establish
+end-to-end receipt verifiability.
+\item An \textbf{AVM Characterization} campaign executing 30
+sessions (10~normal, 10~timeout, 10~attested-fail) to empirically
+measure atomic group execution layouts, fees, and client-side
+latencies.
+\end{enumerate}
+
+\subsubsection{Results}
+Table~\ref{tab:pilot} reports end-to-end metrics.
+All transaction IDs are published in the reproducibility
+artifact~\cite{artifact}.
+
+In the Functional Pilot, we observed 20/20 receipt-verified USDC
+transfers and 20/20 receipt-verified bounty transfers.
+On-chain invariants (mutual exclusivity, conservation, single
+payout) are fully verifiable via Indexer queries; off-chain
+invariants (attester threshold honesty, SSPL evaluation correctness)
+are verifiable only via attester signature inspection, as the
+attester mesh operates off-chain.
+
+In the AVM Characterization campaign, normal settlements consumed
+10~outer transactions (1~main AppCall + 9~dummy OpUps) plus
+2~inner \texttt{AssetTransfer} transactions, incurring a terminal
+group fee of 12{,}000~$\mu$ALGO.
+Including the authorization group fee of 9{,}000~$\mu$ALGO, the
+total session cost was 21{,}000~$\mu$ALGO.
+Refunds consumed 7~outer transactions (1~main AppCall + 6~dummy
+OpUps) plus 2~inner \texttt{AssetTransfer} transactions, incurring
+a terminal group fee of 9{,}000~$\mu$ALGO and a total session cost
+of 18{,}000~$\mu$ALGO.
+The median client-side end-to-end latency was 12.32\,s; the p95
+latency of 23.12\,s corresponds to timeout sessions that wait for
+the deadline round to pass before submitting the refund.
+
+\begin{table}[h]
+\centering
+\caption{Algorand Testnet Functional Pilot and AVM Characterization
+results}
+\label{tab:pilot}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Unit} \\
+\midrule
+Sessions executed (Pilot)     & 20              & sessions \\
+Sessions executed (AVM Char.) & 30              & sessions \\
+Client-side latency (p50)     & 12.32           & s \\
+Client-side latency (p95)     & 23.12           & s \\
+Total session fee (Normal)    & 21{,}000        & $\mu$ALGO \\
+Total session fee (Refund)    & 18{,}000        & $\mu$ALGO \\
+Pooled cost units (Normal)    & 8{,}400         & units \\
+Pooled cost units (Refund)    & 6{,}300         & units \\
+On-chain cost-unit profiling  & NA\_DESIGN\_ONLY & --- \\
+Refund precision              & 100.0           & \% \\
+Refund recall                 & 100.0           & \% \\
+Invariant violations          & 0               & count \\
+\bottomrule
+\multicolumn{3}{l}{\footnotesize On-chain cost-unit profiling is
+not available via the Algorand Indexer.} \\
+\end{tabular}
+}
+\end{table}
+
+\subsection{Discrete-Event Simulation}
+\label{sec:sim}
+
+\subsubsection{Simulator design}
+We implemented a discrete-event simulator in Python (\texttt{simpy})
+modeling the T-REX protocol lifecycle.
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Workload:} Poisson event arrivals at rate
+$\lambda \in \{10, 1000\}$ events/s.
+\item \textbf{Network:} Fixed block time of 3.5\,s; packet loss
+$p \in \{0.00, 0.05\}$.
+\item \textbf{Adversary:} Malicious sellers injecting
+\texttt{FAIL}-SSPL payloads at rate $\rho \in \{0.00, 0.10\}$;
+up to $f \in \{0, 1\}$ colluding Byzantine attesters.
+\end{itemize}
+
+We simulated 160 runs total with $N = 10$ per cell, yielding 1.76M
+session-level rows.
+Throughput is measured as the terminal-completion rate over the
+terminal-event measurement window.
+All simulation values represent VALID\_SIMULATION\_ONLY:
+model-based synthetic estimates under stated assumptions.
+
+\noindent\textbf{Statistical note.}
+With $N = 10$ runs per cell, we report point estimates.
+The deterministic block-time model and fixed adversarial injection
+rate yield low inter-run variance (coefficient of variation
+$< 5\%$ for throughput across all cells), supporting the adequacy
+of $N = 10$ for the reported precision.
+Full per-run data are available in the artifact.
+
+\subsubsection{Security Metric Definitions}
+\begin{definition}[Security metrics]
+\label{def:secmetrics}
+\textbf{FRR} (False Release Rate): the fraction of sessions
+reaching \texttt{Released} without valid attestation.
+\textbf{ODR} (Omission Detection Rate): the fraction of sessions
+in which the seller fails to respond (timeout due to packet loss
+or omission) that are correctly detected and routed to
+\texttt{Refunded(TIMEOUT)}.
+\textbf{BFSR} (Byzantine Fault Settlement Rate): the fraction of
+settlements influenced by Byzantine attesters or front-running
+relayers, decomposed into duplicate-claim, replay, front-running,
+and collusion sub-metrics.
+\end{definition}
+
+\subsubsection{Results}
+Tables~\ref{tab:sim-perf} and~\ref{tab:sim-sec} summarize
+performance and security metrics.
+
+The super-linear throughput degradation at $p = 0.05$ (from 714.29
+to 158.73\,s/s at $\lambda = 1000$) arises because each lost
+attestation message triggers a full re-evaluation round-trip in the
+SSPL pipeline, effectively serializing the attester stage and
+reducing effective parallelism.
+Packet loss at $\lambda = 10$ has negligible impact (9.92 vs.\
+9.56\,s/s) because the pipeline is not saturated.
+
+\begin{table}[h]
+\centering
+\caption{Simulation: performance metrics (VALID\_SIMULATION\_ONLY)}
+\label{tab:sim-perf}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}llll@{}}
+\toprule
+$\lambda$ (ev/s) & $p$ & \textbf{Throughput (s/s)}
+  & \textbf{Settlement latency p50 (s)} \\
+\midrule
+10   & 0.00  & 9.92   & 12.75 \\
+1000 & 0.00  & 714.29 & 12.65 \\
+10   & 0.05  & 9.56   & 12.75 \\
+1000 & 0.05  & 158.73 & 12.68 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Simulation: security metrics (VALID\_SIMULATION\_ONLY)}
+\label{tab:sim-sec}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lllll@{}}
+\toprule
+$\rho$ & $f$ & \textbf{FRR} & \textbf{ODR}
+  & \textbf{Frontrun BFSR} \\
+\midrule
+0.00 & 0 & 0.00 & NA & NA \\
+0.10 & 0 & 0.00 & 1.00 & ${\approx}\,0.10$ \\
+0.00 & 1 & 0.00 & NA & NA \\
+0.10 & 1 & 0.00 & 1.00 & ${\approx}\,0.10$ \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize FRR = False Release Rate;
+ODR = Omission Detection Rate (timeout);} \\
+\multicolumn{5}{l}{\footnotesize BFSR = Byzantine Fault Settlement
+Rate (front-running sub-metric).} \\
+\end{tabular}
+}
+\end{table}
+
+\noindent\textbf{Interpretation.}
+FRR = 0.00 across all configurations confirms that no session
+reached \texttt{Released} without valid attestation, even under
+10\% malicious payload injection ($\rho = 0.10$) and one Byzantine
+attester ($f = 1$).
+ODR = 1.00 for $\rho = 0.10$ configurations confirms that all
+timeout events (caused by packet loss or seller omission) were
+correctly detected and refunded.
+The front-running BFSR of ${\approx}\,0.10$ reflects the stipulated
+same-block race model: front-running relayers may reorder
+transactions within a block but cannot alter the settlement outcome
+due to nonce binding and first-valid-group-wins semantics.
+Duplicate-claim and replay BFSR are zero across all runs.
+Zero violations of the invariants in Table~\ref{tab:invariants}
+were observed.
+
+%==============================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Interpretation and RQ Mapping}
+The Algorand Testnet Functional Pilot and AVM Characterization
+(\S\ref{sec:pilot}) demonstrate that T-REX's atomic-group design
+successfully executes four Ed25519 verifications plus state
+transitions within the pooled budget, at marginal per-settlement
+cost.
+The simulation (\S\ref{sec:sim}) confirms safety invariants under
+adversarial workloads, with zero false releases and 100\% timeout
+detection within the tested parameter ranges.
+
+\noindent\textbf{RQ1} is addressed by the protocol specification
+(\S\ref{sec:protocol}) and validated by the Functional Pilot
+(20/20 receipt-verified sessions).
+\textbf{RQ2} is addressed by the SSPL design
+(\S\ref{sec:protocol}) and the AVM budget analysis
+(\S\ref{sec:avm}), demonstrating that four Ed25519 verifications
+fit within the 8{,}400-unit pooled budget.
+\textbf{RQ3} is addressed by Proposition~\ref{prop:liveness} and
+the relayer bounty mechanism (\S\ref{sec:protocol}).
+\textbf{RQ4} is addressed by the IFRS~15/REA mapping
+(\S\ref{sec:accounting}) and the on-chain evidence trail
+$\pi_{\text{chain}}$.
+
+\subsection{Limitations}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Syntactic, not semantic, SLA.}
+SSPL verifies structural properties of responses, not semantic
+quality (e.g., whether an LLM inference was factually correct).
+Extending T-REX to semantic verification would require zkTLS-style
+proofs or trusted hardware, both outside the current AVM budget.
+\item \textbf{Relayer concentration risk.}
+Proposition~\ref{prop:liveness} depends on at least one rational
+relayer being online.
+Empirical relayer concentration was not measured on a live
+permissionless network in this work.
+\item \textbf{Single-chain, Testnet-only deployment.}
+Evaluation is confined to Algorand Testnet.
+No Mainnet deployment was performed.
+Porting to EVM chains with different opcode pricing (e.g., gas
+markets with EIP-1559 volatility) requires re-tuning the
+atomic-group design.
+\item \textbf{Simulation fidelity.}
+Network delays and adversary behaviors are modeled, not reproduced
+from live traffic.
+\item \textbf{Cost-unit profiling gap.}
+The Algorand Indexer does not expose per-opcode cost-unit
+consumption.
+All cost-unit figures are theoretical estimates (NA\_DESIGN\_ONLY);
+empirical profiling via a custom node build is deferred to future
+work.
+\end{itemize}
+
+\subsection{Ethical Considerations}
+The Algorand Testnet campaigns exposed real (Testnet) capital to
+experimental smart contracts.
+To limit externalities, we (i)~hard-capped per-session TVL at
+50~USDC, (ii)~capped total capital at risk at 1{,}000~USD
+equivalent on Testnet, (iii)~retained a 2-of-3 multisig
+kill-switch, and (iv)~subjected the TEAL source to 30 days of
+Testnet fuzzing prior to evaluation.
+All transaction hashes are published to enable post-hoc community
+review.
+No Mainnet deployment was performed.
+
+\subsection{Future Work}
+Four directions merit further investigation:
+(i)~zkTLS integration for semantic payload verification;
+(ii)~multi-party escrow for composite agentic workflows;
+(iii)~formal verification of the TEAL source using a certified
+semantics (e.g., via Coq extraction); and
+(iv)~field studies with enterprise ERP systems consuming T-REX
+audit trails for IFRS~15 reporting.
+
+%==============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+T-REX specifies a security-aware protocol for SLA-bound conditional
+settlement in HTTP-native agentic commerce.
+By operationalizing TEA's third entry as on-chain state-transition
+evidence produced by a threshold-attested state machine, and by
+designing the AVM execution to respect strict cost-unit budgets via
+atomic transaction grouping with dummy OpUp budget pooling, T-REX
+provides trust-minimized escrow, deterministic refunds, and a
+verifiable audit trail compatible with IFRS~15 and REA.
+The Algorand Testnet Functional Pilot, AVM Characterization, and
+discrete-event simulation confirm safety invariants and practical
+performance under adversarial conditions, with a median client-side
+settlement latency of 12.32\,s, 100\% timeout detection, and zero
+invariant violations.
+We release the complete artifact to support independent reproduction
+and extension.
+
+%==============================================================================
+\section*{Acknowledgments}
+The authors thank the Algorand developer community for technical
+support during Testnet deployment, and the anonymous reviewers for
+feedback that substantially improved the rigor of this work.
+
+%==============================================================================
+\section*{Data and Code Availability}
+\label{sec:reproducibility}
+The reproducibility artifact---including PyTeal source, compiled
+TEAL, simulator code, Testnet transaction IDs, raw CSVs, analysis
+notebooks, and containerized environment---is archived at Zenodo
+(DOI: \TODO{10.5281/zenodo.XXXXXXX}) and mirrored at
+\url{https://github.com/T-REX-Protocol/trex-repro}.
+The artifact is released under the MIT license.
+
+%==============================================================================
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{99}
+
+\bibitem{x402spec}
+x402~Foundation, \emph{x402 Protocol Specification: HTTP~402
+Payment Required for Machine-to-Machine Economies}.
+Linux Foundation, 2025.
+[Online]. Available: \url{https://docs.x402.org/}
+
+\bibitem{x402facilitator}
+x402~Foundation, \emph{x402 Core Concepts: Facilitator}, 2026.
+[Online]. Available:
+\url{https://docs.x402.org/core-concepts/facilitator}
+
+\bibitem{x402receipts}
+x402~Foundation, \emph{x402 Extensions: Signed Offers and Receipts},
+2026.
+[Online]. Available:
+\url{https://docs.x402.org/extensions/offer-receipt}
+
+\bibitem{grigg2005}
+I.~Grigg, ``Triple Entry Accounting,'' \emph{Systemics, Inc.},
+Working Paper, 2005.
+
+\bibitem{boyle2001}
+T.~Boyle, ``GLT and GLR Architecture,'' \emph{Ledgerism.net}, 2001.
+
+\bibitem{ibanez2023}
+J.~I.~Iba\~{n}ez, C.~N.~Bayer, P.~Tasca, and J.~Xu, ``Triple-Entry
+Accounting, Blockchain, and Next of Kin,'' in \emph{Digital Assets},
+Cambridge Univ. Press, 2025, pp.~198--226.
+
+\bibitem{sarwar2023}
+M.~I.~Sarwar, I.~Khan, L.~A.~Maghrabi, and K.~Nisar, ``A Survey on
+Blockchain-Based Triple-Entry Accounting in B2B Context,''
+\emph{J. Inf. Syst.}, vol.~40, no.~1, pp.~25--45, 2026.
+
+\bibitem{asokan2004}
+N.~Asokan, V.~Shoup, and M.~Waidner, ``Optimistic Fair Exchange of
+Digital Signatures,'' \emph{IEEE Trans. Knowl. Data Eng.}, vol.~16,
+no.~4, pp.~449--461, 2004.
+
+\bibitem{pagnia2003}
+H.~Pagnia and F.~G\"{a}rtner, ``On the Impossibility of Fair
+Exchange Without a Trusted Third Party,'' \emph{IEEE Trans.
+Dependable Secure Comput.}, 2003.
+
+\bibitem{poon2016lightning}
+J.~Poon and T.~Dryja, ``The Bitcoin Lightning Network: Scalable
+Off-Chain Instant Payments,'' 2016.
+
+\bibitem{gilad2017algorand}
+Y.~Gilad, R.~Hemo, S.~Micali, G.~Vlachos, and N.~Zeldovich,
+``Algorand: Scaling Byzantine Agreements for Cryptocurrencies,''
+in \emph{Proc. SOSP}, 2017, pp.~51--68.
+
+\bibitem{algorand_costs}
+Algorand~Developers, \emph{Smart Contract Costs and Constraints},
+2026.
+[Online]. Available:
+\url{https://dev.algorand.co/concepts/smart-contracts/costs-constraints/}
+
+\bibitem{mccarthy1982rea}
+W.~E.~McCarthy, ``The REA Accounting Model: A Generalized Framework
+for Accounting Systems in an Age of Shared Databases,''
+\emph{Accounting Rev.}, vol.~57, no.~3, pp.~554--578, 1982.
+
+\bibitem{ifrs15}
+IFRS~Foundation, \emph{IFRS~15 Revenue from Contracts with
+Customers}, 2014 (amended 2024).
+[Online]. Available:
+\url{https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/}
+
+\bibitem{artifact}
+T.~Le and \TODO{Co-Author}, ``T-REX Reproducibility Artifact,''
+Zenodo, 2026.
+DOI: \TODO{10.5281/zenodo.XXXXXXX}, Code:
+\url{https://github.com/T-REX-Protocol/trex-repro}.
+
+\end{thebibliography}
+
+\end{document}

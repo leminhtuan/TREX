@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Reconciliation of T-REX Execution Fees (Campaign C vs. Campaign D)}
+\label{tab:fee_reconciliation}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Measurement Scope} & \textbf{Authorize Group ($\mu$ALGO)} & \textbf{Terminal Group ($\mu$ALGO)} & \textbf{Total Session Cost ($\mu$ALGO)} \\ \midrule
+\textbf{Scope A: All-in Cost (Actual)}\textsuperscript{a} & 18,000 & 12,000 & 30,000 \\
+\textbf{Scope B: Terminal-Only (Reviewer Assumed)}\textsuperscript{b} & --- & 12,000 & --- \\
+\textbf{Scope C: Marginal Protocol Cost}\textsuperscript{c} & 6,000 & 10,000 & 16,000 \\ \bottomrule
+\multicolumn{4}{p{\dimexpr\linewidth-2\tabcolsep}}{\footnotesize \textsuperscript{a} \textbf{Campaign C/D Raw Logs:} The unoptimized scripts overpaid the Authorize AppCalls (4,000 each instead of 1,000) and Terminal main AppCall (3,000 instead of 1,000). Total actual network fee was 30,000 $\mu$ALGO.} \\
+\multicolumn{4}{p{\dimexpr\linewidth-2\tabcolsep}}{\footnotesize \textsuperscript{b} \textbf{Reviewer Math:} The reviewer incorrectly assumed 1 main + 9 OpUp + 2 Inner = 12,000. Under AVM fee pooling, inner transactions do not incur additional fees if covered by the outer group.} \\
+\multicolumn{4}{p{\dimexpr\linewidth-2\tabcolsep}}{\footnotesize \textsuperscript{c} \textbf{Campaign D Reported Scope:} Represents the theoretical minimum marginal fee for the \textit{entire session} (6 outer authorize + 10 outer terminal = 16,000 $\mu$ALGO). The manuscript previously mixed this session-level fee with terminal-only transaction counts.} \\
+\end{tabular}
+}
+\end{table}

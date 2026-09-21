@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\caption{Semantic Capabilities: x402 vs. T-REX}
+\label{tab:x402_comparison}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Feature / Semantics} & \textbf{x402 v2} & \textbf{RC-S-P} & \textbf{Naive Escrow} & \textbf{T-REX} \\ \midrule
+\textit{Payment Flow Semantics} \\
+Payment Authorization & Yes & Yes & Yes & Yes \\
+Upfront Payment & Yes & Yes & Yes & Yes \\
+Escrow Capabilities & Yes & No & Yes & Yes \\
+Batch Settlement & Yes & Yes & No & Yes \\
+Signed Offers \& Receipts & Yes & No & No & Yes \\ \midrule
+\textit{Service-Condition Semantics} \\
+Deterministic Refund Semantics & No & No & No & Yes \\
+SLA Predicate Binding & No & No & No & Yes \\
+Threshold Attestation & No & No & No & Yes \\
+Request/Response Crypto-Binding & No & No & No & Yes \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

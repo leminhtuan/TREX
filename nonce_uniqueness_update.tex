@@ -1,0 +1,39 @@
+% ==============================================
+% LATEX UPDATES FOR NONCE UNIQUENESS ENFORCEMENT
+% ==============================================
+
+% 1. Session ID & Nonce Derivation (Option B Architecture)
+\subsection{Cryptographic Session and Nonce State}
+To explicitly prevent duplicate nonces across concurrent or post-terminal states, the T-REX protocol namespaces session nonces to the requesting buyer. While the global session identifier $id$ remains an escalating integer, the unique state markers used for authorization and settlement are derived as follows:
+\begin{align}
+k_{\text{active}} &= \mathrm{SHA512\_256}(\text{``T-REX-ACTIVE-NONCE''} \parallel B \parallel n) \\
+k_{\text{spent}} &= \mathrm{SHA512\_256}(\text{``T-REX-SPENT''} \parallel \text{app\_id} \parallel B \parallel n)
+\end{align}
+
+% 2. Nonce Uniqueness Theorem / Invariant
+\begin{theorem}[Strict Nonce Uniqueness]
+For any buyer $B$ and any nonce $n$, the smart contract enforces that at most one active session may authorize $(B, n)$. The transition invariant is:
+\[
+\mathrm{Authorize}(B, n) \implies \neg \mathrm{Active}(k_{\text{active}}) \land \neg \mathrm{Spent}(k_{\text{spent}})
+\]
+Upon successful authorization, the contract asserts $\mathrm{Active}(k_{\text{active}}) = 1$. Upon any terminal transition (Release or Refund), the contract clears $\mathrm{Active}(k_{\text{active}})$ and irrevocably asserts $\mathrm{Spent}(k_{\text{spent}}) = 1$. Consequently, both concurrent authorizations and post-terminal replays for $(B, n)$ deterministically revert.
+\end{theorem}
+
+% 3. Algorithm Pseudocode
+\begin{algorithm}[h]
+\caption{T-REX Nonce-Enforced Authorization}
+\label{alg:authorize}
+\begin{algorithmic}[1]
+\Require $B, S, n, a, r_{dead}, H_q, H_c, \sigma_B$
+\State $id \gets \mathrm{Global.NextID}$
+\State $M_B \gets \mathrm{encode}(\text{``T-REX-BUY''}, id, H_q, H_c, a, \text{USDC}, S, \text{app\_id}, r_{dead}, n)$
+\State $\mathbf{assert}\; \mathrm{Ed25519Verify}(M_B, \sigma_B, B_{pk})$
+\State $k_{\text{active}} \gets \mathrm{SHA512\_256}(\text{``T-REX-ACTIVE-NONCE''} \parallel B \parallel n)$
+\State $k_{\text{spent}} \gets \mathrm{SHA512\_256}(\text{``T-REX-SPENT''} \parallel \text{app\_id} \parallel B \parallel n)$
+\State $\mathbf{assert}\; \neg \mathrm{BoxExists}(k_{\text{active}})$ \Comment{Prevents concurrent duplicate nonces}
+\State $\mathbf{assert}\; \neg \mathrm{BoxExists}(k_{\text{spent}})$ \Comment{Prevents post-terminal replays}
+\State $\mathrm{BoxPut}(k_{\text{active}}, id)$
+\State $\mathrm{CreateSessionBox}(id, \dots)$
+\State $\mathrm{Global.NextID} \gets id + 1$
+\end{algorithmic}
+\end{algorithm}

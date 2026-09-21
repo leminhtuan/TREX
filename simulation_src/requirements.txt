@@ -1,0 +1,5 @@
+# T-REX Simulation Requirements
+# Python 3.12.9
+# All outputs are model-based synthetic estimates under stated assumptions.
+# No Algorand API calls. No transactions submitted.
+numpy>=1.26.0,<2.0

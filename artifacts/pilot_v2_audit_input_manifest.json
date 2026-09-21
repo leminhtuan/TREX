@@ -1,0 +1,27 @@
+{
+  "timestamp_utc": "2026-08-16T01:41:58.109894Z",
+  "python_version": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]",
+  "audit_script_sha256": "2f5fd0694b9a28d5a6f84b6aeba357dc87f48645354953daef60684d7424135b",
+  "inputs": [
+    {
+      "file": "transactions_v2.csv",
+      "sha256": "1c91545bd6bf928b65df550405db5ef8922069968fd2276fb80e790fd7b794b1",
+      "size_bytes": 6870
+    },
+    {
+      "file": "tx_ids_pilot_v2.txt",
+      "sha256": "f6beacc61dd081d95ced1737e700e4a89990a9212811f685232ba09a27688dfb",
+      "size_bytes": 1078
+    },
+    {
+      "file": "pilot_v2_manifest.json",
+      "sha256": "8582e5d1458bae13088e272c8c4431cbea30010f3aea60648bac90cb97e6400e",
+      "size_bytes": 94
+    },
+    {
+      "file": "pilot_report_v2.md",
+      "sha256": "9a8597c9e26d5e5e58d3bacfe2455240e67f7e5d19ed180b6a2f37cb09bf5351",
+      "size_bytes": 900
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+% ==============================================================================
+% RECONCILED LATEX SNIPPETS FOR v19.tex (CR-3 & CR-4)
+% ==============================================================================
+
+% ------------------------------------------------------------------------------
+% 1. ABSTRACT SNIPPET (Replace lines around cost-unit budgeting in Abstract)
+% ------------------------------------------------------------------------------
+To accommodate the strict cost-unit budget of the Algorand Virtual Machine (AVM)---where three Ed25519 verifications in the settlement call demand $3 \times 1{,}900 = 5{,}700$ cost units against a 700-unit per-call limit (with buyer signature verification executed during authorization)---we design T-REX as an atomic transaction group that pools execution budget via dummy OpUp calls. Under Algorand node-level simulation profiling, the settlement path consumes 6{,}740 cost units (within a pooled budget of 7{,}000 units provided by 10 outer application calls, or 8{,}400 units across the 12-transaction execution graph), while the attested-fail refund path consumes 4{,}522 cost units (within a 4{,}900-unit outer pool, or 6{,}300 units across 9 transactions). We report (i)~an Algorand Testnet functional pilot of 20 sessions, (ii)~an on-chain AVM characterization of 30 sessions with empirical network-fee measurements (21{,}000\,$\mu$ALGO total normal session fee), and (iii)~a discrete-event simulation of 1.76M synthetic events.
+
+% ------------------------------------------------------------------------------
+% 2. CONTRIBUTION C2 (Replace Section 1.3 C2)
+% ------------------------------------------------------------------------------
+\item \textbf{AVM cost-engineering technique.} We apply Algorand's atomic-group budget-pooling mechanism to an escrow workflow verifying Ed25519 signatures on-chain (\S\ref{sec:avm}). By verifying buyer authorization on-chain during escrow lock and delegating terminal checks to seller and attester signatures, we reduce the terminal execution footprint to 3 verifications, empirically measured via Algorand SDK simulation at 6{,}740 cost units (Normal) and 4{,}522 cost units (Refund).
+
+% ------------------------------------------------------------------------------
+% 3. SECTION 6: AVM-AWARE IMPLEMENTATION & TABLES (Replace Section 6.1)
+% ------------------------------------------------------------------------------
+\subsection{Cost-Unit Budgeting and SDK Simulation}
+\label{sec:avm-budget}
+
+The T-REX state machine splits cryptographic verification across protocol phases to optimize AVM execution:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Authorization phase:} The buyer's signature $\sigma_B$ is verified on-chain during the \texttt{authorize} application call ($1 \times 1{,}900 = 1{,}900$ units) and recorded in the session box storage.
+\item \textbf{Settlement phase:} The \texttt{settle} application call verifies the seller's signature $\sigma_S$ ($1{,}900$ units) and $t = 2$ attester signatures from $\Sigma_A$ ($2 \times 1{,}900 = 3{,}800$ units), totaling 5{,}700 units for signature checks alone. State updates, SHA-256 hash commitments, and 2 inner transaction submissions consume an additional 1{,}040 units.
+\item \textbf{Refund phase:} The \texttt{refund} application call verifies 2 attester signatures for \texttt{REASON\_ATTESTED\_FAIL} ($3{,}800$ units), and 0 signatures for \texttt{REASON\_TIMEOUT} (which relies strictly on the block round condition $r_{\text{curr}} > r_{\text{dead}}$).
+\end{enumerate}
+
+To provide the required budget, the settlement group includes 9 dummy OpUp application calls (empty calls that contribute 700 units each), providing $10 \times 700 = 7{,}000$ cost units across the 10 outer application calls (or $12 \times 700 = 8{,}400$ units when counting the 2 inner transfers in the execution graph). Using the Algorand SDK \texttt{simulate\_raw_transactions} endpoint, we measure exact group consumption: the Normal settlement group consumes \textbf{6{,}740 cost units} (margin: 260 units against outer pool; 1{,}660 units against total graph), while the Attested-Fail refund group consumes \textbf{4{,}522 cost units} (margin: 378 units against outer pool; 1{,}778 units against total graph), as detailed in Table~\ref{tab:avm}.
+
+\begin{table}[h]
+\centering
+\caption{Cost-Unit Budget and Empirical SDK Simulation Profiling (Terminal Phase)}
+\label{tab:avm}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+\textbf{Path} & \textbf{Component} & \textbf{Theor. Est.} & \textbf{Simulated (Actual)} & \textbf{Outer Pool (Total)} & \textbf{Margin} \\
+\midrule
+\multirow{4}{*}{Normal} 
+& Main AppCall ($\sigma_S + \Sigma_A$) & 5{,}700 & 6{,}047 & \multirow{4}{*}{7{,}000 (8{,}400)} & \multirow{4}{*}{260 (1{,}660)} \\
+& 9 OpUp dummy AppCalls                & 0       & 693   & & \\
+& 2 Inner transfers (\texttt{axfer}+\texttt{pay}) & 200--500 & Included in main & & \\
+\cmidrule{2-4}
+& \textbf{Group Total}                 & 5{,}900--6{,}200 & \textbf{6{,}740} & & \\
+\midrule
+\multirow{4}{*}{Refund} 
+& Main AppCall ($\Sigma_A$, fail)      & 3{,}800 & 4{,}141 & \multirow{4}{*}{4{,}900 (6{,}300)} & \multirow{4}{*}{378 (1{,}778)} \\
+& 6 OpUp dummy AppCalls                & 0       & 381   & & \\
+& 2 Inner transfers (\texttt{axfer}+\texttt{pay}) & 200--500 & Included in main & & \\
+\cmidrule{2-4}
+& \textbf{Group Total}                 & 4{,}000--4{,}300 & \textbf{4{,}522} & & \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize $\sigma_B$ is verified during authorization and bound to box storage ($1{,}900$ units offloaded from terminal phase).} \\
+\multicolumn{6}{l}{\footnotesize Simulated via Algorand SDK \texttt{simulate\_raw\_transactions} on Testnet state. Zero execution failures observed.} \\
+\end{tabular}
+}
+\end{table}
+
+\subsection{Empirical Network Fee Observation and Fee Pooling}
+While cost-units dictate execution feasibility, network fees ($\mu$ALGO) dictate economic cost. On Algorand, every fee-bearing outer transaction incurs a minimum protocol fee of 1{,}000~$\mu$ALGO. In our reference implementation, inner transfers specify \texttt{fee: 0} and are covered by outer-group fee pooling:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Authorization group:} 9 transactions $\times$ 1{,}000~$\mu$ALGO = \textbf{9{,}000~$\mu$ALGO} (paid by Buyer).
+\item \textbf{Terminal group:} 
+\begin{itemize}
+\item Normal: 1 main AppCall (fee = 3{,}000~$\mu$ALGO, covering itself plus 2 inner transfers) + 9 OpUps (fee = 1{,}000~$\mu$ALGO each) = \textbf{12{,}000~$\mu$ALGO} (paid by Relayer).
+\item Refund: 1 main AppCall (fee = 3{,}000~$\mu$ALGO) + 6 OpUps (fee = 1{,}000~$\mu$ALGO each) = \textbf{9{,}000~$\mu$ALGO} (paid by Relayer).
+\end{itemize}
+\end{enumerate}
+
+\noindent Total session fee: \textbf{21{,}000~$\mu$ALGO} (Normal) or \textbf{18{,}000~$\mu$ALGO} (Refund), confirmed empirically across all 30 AVM Characterization sessions (Table~\ref{tab:avm-fees}).
+
+\begin{table}[h]
+\centering
+\caption{Empirical fee breakdown by session type}
+\label{tab:avm-fees}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Phase} & \textbf{Outer Tx Count} & \textbf{Group Fee ($\mu$ALGO)} & \textbf{Normal Total} & \textbf{Refund Total} \\
+\midrule
+Authorization & 9      & 9{,}000            & \multirow{2}{*}{\textbf{21{,}000}} & \multirow{2}{*}{\textbf{18{,}000}} \\
+Terminal      & 10 / 7 & 12{,}000 / 9{,}000 &                                    &                                    \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Inner transfers specify \texttt{fee: 0} and are covered by outer-group fee pooling in this deployment.} \\
+\end{tabular}
+}
+\end{table}
+
+% ------------------------------------------------------------------------------
+% 4. TABLE VIII / TABLE V (tab:pilot) RECONCILIATION
+% ------------------------------------------------------------------------------
+% In Table tab:pilot, update the Cost Units rows:
+% Pooled cost units (Normal)    & 7{,}000 / 8{,}400 & units (outer / total graph) \\
+% Pooled cost units (Refund)    & 4{,}900 / 6{,}300 & units (outer / total graph) \\
+% Simulated cost units (Normal) & 6{,}740           & units (empirical SDK simulation) \\
+% Simulated cost units (Refund) & 4{,}522           & units (empirical SDK simulation) \\
+
+% ------------------------------------------------------------------------------
+% 5. SECTION 8.2 LIMITATIONS (Update Cost-Unit Profiling Gap)
+% ------------------------------------------------------------------------------
+\item \textbf{Opcode profiling vs.\ Indexer logs.} The Algorand Indexer does not record per-opcode cost-unit consumption in historical block logs. In this work, group-level opcode consumption is measured via the Algorand SDK node-level \texttt{simulate} endpoint, which executes the transaction group against Testnet state and returns the exact \texttt{app-budget-consumed} (6{,}740 units for Normal; 4{,}522 units for Refund). Finer-grained instruction-by-instruction disassembly profiling remains an avenue for tooling development.

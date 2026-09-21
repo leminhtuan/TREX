@@ -1,0 +1,20 @@
+\begin{table}[h]
+\centering
+\caption{Adversarial Security Validation Matrix}
+\label{tab:adversarial_matrix}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Attack Class} & \textbf{Revert Mechanism} & \textbf{Attempts} & \textbf{Exploits} \\ \midrule
+Replay Auth (Released) & Assertion / SPENT Marker & 20 & 0 \\
+Replay Auth (Refunded) & Assertion / SPENT Marker & 20 & 0 \\
+Duplicate Terminal Group & Box Lookup / Session Not Found & 20 & 0 \\
+Concurrent Auth Duplicate & Box Validation / ACTIVE Box Exists & 20 & 0 \\
+Payload Tampering ($H_p$) & Signature Validation (ed25519verify) & 20 & 0 \\
+Bad Attester Signature & Signature Validation (ed25519verify) & 20 & 0 \\
+Deadline Tampering ($r_{dead}$) & Signature Validation (ed25519verify) & 20 & 0 \\
+Cross-User Replay & State Binding \& Signature Domain Check & 20 & 0 \\
+Cross-Instance Replay & App ID Signature Domain Check & 20 & 0 \\ \midrule
+\textbf{Total} & & \textbf{180} & \textbf{0} \\
+\bottomrule
+\end{tabular}
+\end{table}

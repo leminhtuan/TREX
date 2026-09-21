@@ -1,0 +1,26 @@
+{
+  "refund_tx_id": "FRUCWF6KVQDPPOCTQUQX7PIEVSQ5M3PIB37JQJS54IK72DXKLB2A",
+  "app_id": 769248116,
+  "confirmed_round": 66306854,
+  "app_address": "HFWRIPLCDTD5NVTZ27KBFUKVGL7GTNC7NCUMUNYUFEMFMFM6BY2IRGRBCA",
+  "buyer_address": "42CIA4I5Z7VAX4SON5WN7HL7KLY6MUTZR7N27UHBEM3MY5LGLMZRLPTBPI",
+  "relayer_address": "UP3QMOZVEGWBBRKVBRASMUF7V55FG2KXZFCMZPB4KICPDKEUENT6KKB5SE",
+  "usdc_inner_transfer": {
+    "status": "VERIFIED",
+    "sender": "HFWRIPLCDTD5NVTZ27KBFUKVGL7GTNC7NCUMUNYUFEMFMFM6BY2IRGRBCA",
+    "receiver": "42CIA4I5Z7VAX4SON5WN7HL7KLY6MUTZR7N27UHBEM3MY5LGLMZRLPTBPI",
+    "asset_id": 10458941,
+    "amount": 500000
+  },
+  "bounty_inner_transfer": {
+    "status": "VERIFIED",
+    "sender": "HFWRIPLCDTD5NVTZ27KBFUKVGL7GTNC7NCUMUNYUFEMFMFM6BY2IRGRBCA",
+    "receiver": "UP3QMOZVEGWBBRKVBRASMUF7V55FG2KXZFCMZPB4KICPDKEUENT6KKB5SE",
+    "amount": 500000
+  },
+  "outer_fee": 3000,
+  "inner_transaction_count": 2,
+  "opup_call_count": 6,
+  "balance_check_failure_reason": "Relayer submitted a group of 7 transactions (1 refund + 6 opups) paying a 3000 microAlgos fee per transaction, totaling 21000 microAlgos in fees. The Python off-chain assertion expected the relayer balance to only drop by a max fee of 10000. As a result, the check `r_algo_end > r_algo_start + ALGO_AMOUNT - 10000` failed, despite the 500000 inner payment executing successfully.",
+  "safety_confirmation": "Read-only strictly followed. Zero transactions submitted."
+}
