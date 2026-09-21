@@ -1,0 +1,146 @@
+{
+    "app_id": 772170811,
+    "network": "testnet",
+    "network_genesis_hash": "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
+    "git_commit_sha": "cc4f8bf46476ef4d7a353fb1f2c62d7fb4bdf67d",
+    "approval_program_hash": "RRYTW7VQWWP722I74TFQGPVDE6T2HWPQEJXDP5CGFAXG2UGSJJ62P3OOBM",
+    "clear_program_hash": "74XQDOUMP27NMKK6IX55GRY7WLE7V5Z5E64PCTUKENQ3YP67RT4ZCSTDJE",
+    "functional_passed": 5,
+    "functional_total": 5,
+    "adversarial_reverted": 10,
+    "adversarial_total": 10,
+    "functional_results": [
+        {
+            "session_idx": 1,
+            "session_id": 1,
+            "auth_txid": "UZN5TR6JFAHQ3GUQ4CFQCKAKGZIWYT6S53YMB66GB55XYS5SVYZA",
+            "settle_txid": "ANQMDLW267AIV2LZ4225V66MSWIGZHRWVSHVJ5XVELXTFI4EM5QQ",
+            "confirmed_round": 67516011,
+            "status": "PASSED"
+        },
+        {
+            "session_idx": 2,
+            "session_id": 2,
+            "auth_txid": "YEUCGP2ZAPXSCLDJM534M2ZAC2KSHGXA4LR3ELQZXZA2BQ3PNTGA",
+            "settle_txid": "VG5NN63GHA73KH56KJZ43F4ELI4P64ADTPOKTKCSQR3ACGOV6YHA",
+            "confirmed_round": 67516016,
+            "status": "PASSED"
+        },
+        {
+            "session_idx": 3,
+            "session_id": 3,
+            "auth_txid": "ADMHFIW75LUBGVKI5R3SBVRZGXZ44C6IYBXEQWHG5XHVB2TWOHGQ",
+            "settle_txid": "VVH7YZ4HIKDM5KIDE4TDNDE4XLP3O3B6B3JZXSDI2LCUZEJMKXQA",
+            "confirmed_round": 67516021,
+            "status": "PASSED"
+        },
+        {
+            "session_idx": 4,
+            "session_id": 4,
+            "auth_txid": "3ACSYRC7HRG6XX6DNMRMFTBRPU5XER3LPTDN6WOBEBNPK27IOMBA",
+            "settle_txid": "4IEXGECX4LUVPLCRZWALXRJTRYUH42KWFNQSTKETN7RLQ2XTDG7A",
+            "confirmed_round": 67516026,
+            "status": "PASSED"
+        },
+        {
+            "session_idx": 5,
+            "session_id": 5,
+            "auth_txid": "CZH6NNLWQYBKNF4YX5X67J2ABLZK2M6DOEG6U7574TTDI6ZNW7KA",
+            "settle_txid": "D5JP2MAIUTMNPN6GPXUGD36KKD6I523E52FIRPO27GQKU5NYW2SA",
+            "confirmed_round": 67516030,
+            "status": "PASSED"
+        }
+    ],
+    "adversarial_results": [
+        {
+            "test_num": 1,
+            "name": "Cross-Network Replay (All-Zero Genesis Hash in M_A)",
+            "txid_attempt": "FJMGAG56SIVGTBSCUC7VYMDMAGCXUBD5AZZN272LIF53OSU4SG3A",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 2,
+            "name": "Cross-Network Replay (Mainnet Genesis Hash in M_A)",
+            "txid_attempt": "B5UXPNY2FOJALPKOUO6PKW5PFZJPFBWB4UYTSU6HPS73FAESP4UQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 3,
+            "name": "Cross-User Replay (Wrong Buyer Bound in M_A)",
+            "txid_attempt": "CAFLADBDCOGVJPENRRJNX4DI55ICOQF5ME6UXW5SKISKDSRM4DUQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 4,
+            "name": "Wrong Application ID Replay in M_A",
+            "txid_attempt": "BZXO6CSJ2SSXBYOL5CIUKQLH6FHB6E2MJKJPP3KQXVCMQ46VK3CQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 5,
+            "name": "Deadline Tampering (Attester alters r_dead)",
+            "txid_attempt": "RV7YZPE53AYEUM4RRYBR77O73WSVMZSNHUJL4GLK6IJHLZDO7YQQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 6,
+            "name": "Corrupted Attester Signature (Invalid Ed25519)",
+            "txid_attempt": "3QV6AEUOR6HGQVU5P27PIDAUSF5A47KXUWOQYMYCY4MGBN4RASEQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 7,
+            "name": "Corrupted Seller Signature (Invalid M_S sig)",
+            "txid_attempt": "OY6N3LB5LD37ZH2MOWUZMAOBMFQNIDJ5TPQ4C5ZIM7WDWY35Z55Q",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 8,
+            "name": "Payload Hash Tampering (H_p mismatch)",
+            "txid_attempt": "Y5QXTCVF3N3YTFIZQQN2QEEFQIZJ5BXZHFJS4JXU2NE4WTXT32QA",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 9,
+            "name": "Double Settlement Replay (Deleted Box Key)",
+            "txid_attempt": "N/A (Box deletion precondition)",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "box not found",
+            "status": "PASSED"
+        },
+        {
+            "test_num": 10,
+            "name": "Premature Timeout Refund (Round < Deadline)",
+            "txid_attempt": "DA2X4DTBL2WJ24XKQZAWWJYKCK3LPZULRQ2LAGVHFBJNTEIAXSBQ",
+            "expected": "REVERTED",
+            "actual": "REVERTED",
+            "revert_reason": "logic eval error: assert failed",
+            "status": "PASSED"
+        }
+    ]
+}
