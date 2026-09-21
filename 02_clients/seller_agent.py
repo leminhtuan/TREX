@@ -24,7 +24,7 @@ class SellerAgent:
         sk_bytes = base64.b64decode(self.sk)[:32]
         return SigningKey(sk_bytes)
 
-    def process_request(self, session_id, H_q, H_c, nonce, simulate_mismatch=False):
+    def process_request(self, session_id, H_q, H_c, nonce, buyer_address=None, simulate_mismatch=False):
         # 1. Provide the data (payload P)
         p_payload = json.dumps({"status": "success", "data": "dummy_data"}, separators=(',', ':'))
         H_p = hashlib.sha256(p_payload.encode()).digest()
@@ -32,14 +32,22 @@ class SellerAgent:
         if simulate_mismatch:
             H_p = hashlib.sha256(b"wrong_data").digest()
         
-        # 2. Construct M_S
+        if buyer_address is None:
+            buyer_addr_bytes = encoding.decode_address(config.BUYER_ADDR)
+        elif isinstance(buyer_address, str):
+            buyer_addr_bytes = encoding.decode_address(buyer_address)
+        else:
+            buyer_addr_bytes = bytes(buyer_address)
+        
+        import struct
         M_S = (
             config.PROTOCOL_DOMAIN +
             config.SETTLE_PREFIX +
             to_uint64(self.app_id) +
             self.chain_hash +
+            buyer_addr_bytes +
             to_uint64(session_id) +
-            nonce +
+            struct.pack(">Q", nonce) +
             H_p
         )
         

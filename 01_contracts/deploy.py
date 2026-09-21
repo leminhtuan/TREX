@@ -99,7 +99,7 @@ def main():
         clear_source = f.read()
 
     # Check TEAL version
-    if "#pragma version 10" not in approval_source:
+    if "#pragma version 10" not in approval_source and "#pragma version 11" not in approval_source:
         print("ERROR: TEAL version >= 10 required.")
         sys.exit(1)
 
@@ -179,6 +179,43 @@ def main():
         app_id = res["application-index"]
         print(f"Deployed successfully. App ID: {app_id}")
         
+        from algosdk.logic import get_application_address
+        from algosdk.transaction import PaymentTxn, ApplicationCallTxn
+        app_addr = get_application_address(app_id)
+        print(f"Contract App Address: {app_addr}")
+
+        # Fund the contract account with 2 ALGO for MBR and box storage
+        print("Funding contract account with 2 ALGO...")
+        sp_fund = client.suggested_params()
+        txn_fund = PaymentTxn(sender=addr, sp=sp_fund, receiver=app_addr, amt=2_000_000)
+        stxn_fund = txn_fund.sign(sk)
+        txid_fund = client.send_transaction(stxn_fund)
+        wait_for_confirmation(client, txid_fund, 4)
+        print("Contract account funded successfully.")
+
+        # Opt in to USDC ASA
+        print("Opting contract into USDC ASA (ID: 10458941)...")
+        optin_method = None
+        for m in contract["methods"]:
+            if m["name"] == "opt_in_asa":
+                optin_method = Method.undictify(m)
+                break
+        
+        sp_optin = client.suggested_params()
+        sp_optin.fee = 2000
+        sp_optin.flat_fee = True
+        usdc_id = 10458941
+        txn_optin = ApplicationCallTxn(
+            sender=addr, sp=sp_optin, index=app_id,
+            on_complete=0,
+            app_args=[optin_method.get_selector(), usdc_id.to_bytes(8, 'big')],
+            foreign_assets=[usdc_id]
+        )
+        stxn_optin = txn_optin.sign(sk)
+        txid_optin = client.send_transaction(stxn_optin)
+        wait_for_confirmation(client, txid_optin, 4)
+        print("Contract opted into USDC ASA successfully.")
+        
         # Save artifacts
         os.makedirs("../artifacts", exist_ok=True)
         with open("../artifacts/deploy_tx_id.txt", "w") as f:
@@ -193,11 +230,12 @@ def main():
             "timestamp_utc": datetime.datetime.utcnow().isoformat(),
             "network": args.network,
             "app_id": app_id,
+            "app_address": app_addr,
             "deploy_tx_id": txid,
             "source_sha256": source_hash,
             "teal_sha256": hashlib.sha256(approval_prog).hexdigest(),
             "python_version": sys.version,
-            "usdc_asa_id": 31566704
+            "usdc_asa_id": usdc_id
         }
         with open("../artifacts/contract_build_manifest.json", "w") as f:
             json.dump(manifest, f, indent=4)

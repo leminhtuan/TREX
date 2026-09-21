@@ -1,10 +1,11 @@
 {
-    "timestamp_utc": "2026-08-14T11:09:17.069878",
+    "timestamp_utc": "2026-09-21T08:34:34.064465",
     "network": "testnet",
-    "app_id": 769248116,
-    "deploy_tx_id": "BULKMXVYFO4RTF2GAYHDR343NLXEMQ3TTAVBEBIQLVMTKKMVCNHA",
-    "source_sha256": "a40f76be4d77291f4ea9b5f5d289c5cf839bfba40f14c2e6be3a61f336664ccf",
-    "teal_sha256": "c51aa4a4c8affc932086248dd9d6de4af09b939aacaae1804ae391f9ddb32a28",
-    "python_version": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]",
-    "usdc_asa_id": 31566704
+    "app_id": 772170811,
+    "app_address": "JYDZRPKR2CGMZSKWKUCJUU7FNR5IF3NE33W2QHKFFZYKMKMNQFCLT2ILBQ",
+    "deploy_tx_id": "CEMCY5SIMF5ZNXBXR2MWDVHKH5G22M76KHDT2DIMITOXU4SXUKOA",
+    "source_sha256": "6d230b8b2a981dc211f8fa8c1de36fd422ddab4854c0bf5e9cae2e79ab8c930f",
+    "teal_sha256": "b825eed62827571db80d5db04961742da5284e8eaa2074cf66071f375dce22b6",
+    "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "usdc_asa_id": 10458941
 }

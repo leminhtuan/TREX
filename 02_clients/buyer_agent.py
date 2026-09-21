@@ -34,29 +34,35 @@ class BuyerAgent:
         
         H_q = hashlib.sha256(q_payload.encode()).digest()
         H_c = hashlib.sha256(c_payload.encode()).digest()
-        nonce = os.urandom(32)
+        nonce = getattr(self, 'nonce_override', None) or int.from_bytes(os.urandom(8), 'big')
         
+        app_info = self.client.application_info(self.app_id)
+        next_id = 0
+        for kv in app_info.get("params", {}).get("global-state", []):
+            if base64.b64decode(kv["key"]) == b"next_id":
+                next_id = kv["value"]["uint"]
+                break
+                
+        import struct
         M_B = (
-            config.PROTOCOL_DOMAIN +
-            config.AUTH_PREFIX +
-            to_uint64(self.app_id) +
-            self.chain_hash +
-            encoding.decode_address(self.addr) +
-            encoding.decode_address(seller_addr) +
-            to_uint64(config.USDC_ASA_ID) +
-            to_uint64(amount_pay) +
-            to_uint64(amount_bounty) +
-            to_uint64(deadline_round) +
-            nonce +
+            b"T-REX-BUY" +
+            struct.pack(">Q", next_id) +
             H_q +
-            H_c
+            H_c +
+            struct.pack(">Q", amount_pay) +
+            struct.pack(">Q", config.USDC_ASA_ID) +
+            encoding.decode_address(seller_addr) +
+            struct.pack(">Q", self.app_id) +
+            struct.pack(">Q", deadline_round) +
+            struct.pack(">Q", nonce)
         )
         
         signing_key = self.get_signing_key()
         signature = signing_key.sign(M_B).signature
         
         params = self.client.suggested_params()
-        
+        params.flat_fee = True
+        params.fee = 1000
         txn_usdc = transaction.AssetTransferTxn(
             sender=self.addr,
             sp=params,
@@ -72,22 +78,18 @@ class BuyerAgent:
             amt=amount_bounty
         )
         
-        app_info = self.client.application_info(self.app_id)
-        next_id = 0
-        for kv in app_info.get("params", {}).get("global-state", []):
-            if base64.b64decode(kv["key"]) == b"next_id":
-                next_id = kv["value"]["uint"]
-                break
-                
-        nonce_box = (self.app_id, b"nonce:" + nonce)
-        session_box = (self.app_id, b"session:" + to_uint64(next_id))
+        buyer_addr_bytes = encoding.decode_address(self.addr)
+        nonce_box = (self.app_id, hashlib.new("sha512_256", b"T-REX-ACTIVE-NONCE" + buyer_addr_bytes + struct.pack(">Q", nonce)).digest())
+        session_box = (self.app_id, b"session:" + struct.pack(">Q", next_id))
+        spent_box_key = hashlib.new('sha512_256', b"T-REX-SPENT" + struct.pack(">Q", self.app_id) + buyer_addr_bytes + struct.pack(">Q", nonce)).digest()
+        spent_box = (self.app_id, spent_box_key)
         
         from algosdk.abi import Method
-        authorize_method = Method.from_signature("authorize(address,uint64,uint64,uint64,byte[32],byte[32],byte[32],byte[64],axfer,pay)uint64")
+        authorize_method = Method.from_signature("authorize(address,uint64,uint64,uint64,uint64,byte[32],byte[32],byte[64],axfer,pay)uint64")
         
         app_params = self.client.suggested_params()
         app_params.flat_fee = True
-        app_params.fee = 4000
+        app_params.fee = 1000
         
         txn_app = transaction.ApplicationCallTxn(
             sender=self.addr,
@@ -100,12 +102,12 @@ class BuyerAgent:
                 amount_pay.to_bytes(8, "big"),
                 amount_bounty.to_bytes(8, "big"),
                 deadline_round.to_bytes(8, "big"),
-                nonce,
+                nonce.to_bytes(8, "big"),
                 H_q,
                 H_c,
                 signature
             ],
-            boxes=[nonce_box, session_box]
+            boxes=[nonce_box, session_box, spent_box]
         )
         
         opup_method = Method.from_signature("opup(uint64)void")

@@ -16,11 +16,21 @@ class RelayerAgent:
         self.client = algod.AlgodClient("", config.ALGONODE_URL)
         
     def settle(self, session_id, H_p, seller_signature, attester_1, attester_2):
-        params = self.client.suggested_params()
-        params.flat_fee = True
-        params.fee = 3000
+        params_main = self.client.suggested_params()
+        params_main.flat_fee = True
+        params_main.fee = 3000
         
         session_box = (self.app_id, b"session:" + to_uint64(session_id))
+        
+        # Read the session box to extract the nonce
+        import base64
+        try:
+            box_info = self.client.application_box_by_name(self.app_id, session_box[1])
+            box_data = base64.b64decode(box_info['value'])
+            nonce = box_data[97:97+32]
+            nonce_box = (self.app_id, b"nonce:" + nonce)
+        except Exception as e:
+            raise ValueError(f"Failed to read session box: {e}")
         
         from algosdk.abi import Method
         settle_method = Method.from_signature("settle(uint64,byte[32],byte[64],uint8,byte[64],uint8,byte[64],address)void")
@@ -36,18 +46,21 @@ class RelayerAgent:
             attester_2["signature"],
             encoding.decode_address(self.addr)
         ]
-        print(f"app_args[4] (attester 1 index): {app_args[4]}")
-        print(f"app_args[6] (attester 2 index): {app_args[6]}")
+        
         txn_app = transaction.ApplicationCallTxn(
             sender=self.addr,
-            sp=params,
+            sp=params_main,
             index=self.app_id,
             on_complete=transaction.OnComplete.NoOpOC,
             app_args=app_args,
-            boxes=[session_box],
+            boxes=[session_box, nonce_box],
             foreign_assets=[config.USDC_ASA_ID],
             accounts=[config.SELLER_ADDR, self.addr]
         )
+        
+        params_opup = self.client.suggested_params()
+        params_opup.flat_fee = True
+        params_opup.fee = 1000
         
         opup_method = Method.from_signature("opup(uint64)void")
         txns = [txn_app]
@@ -55,18 +68,20 @@ class RelayerAgent:
         for i in range(9):
             txn_opup = transaction.ApplicationCallTxn(
                 sender=self.addr,
-                sp=params,
+                sp=params_opup,
                 index=self.app_id,
                 on_complete=transaction.OnComplete.NoOpOC,
                 app_args=[opup_method.get_selector(), (i).to_bytes(8, "big")]
             )
             txns.append(txn_opup)
             
+        assert len(txns) <= 16, f"Group limit exceeded: {len(txns)} outer transactions"
         gid = transaction.calculate_group_id(txns)
         for t in txns:
             t.group = gid
             
         stxns = [t.sign(self.sk) for t in txns]
+        total_fee = sum(t.fee for t in txns)
         
         tx_id = self.client.send_transactions(stxns)
         res = transaction.wait_for_confirmation(self.client, tx_id, 4)
@@ -78,16 +93,28 @@ class RelayerAgent:
             "tx_id": tx_id,
             "confirmed_round": confirmed_round,
             "outcome": "Released",
-            "fee": params.fee,
+            "fee": total_fee,
+            "outer_tx_count": len(txns),
+            "inner_tx_count": 2,
             "finality_timestamp": finality_timestamp
         }
         
     def refund(self, session_id, reason, attester_1=None, attester_2=None):
-        params = self.client.suggested_params()
-        params.flat_fee = True
-        params.fee = 3000
+        params_main = self.client.suggested_params()
+        params_main.flat_fee = True
+        params_main.fee = 3000
         
         session_box = (self.app_id, b"session:" + to_uint64(session_id))
+        
+        # Read the session box to extract the nonce
+        import base64
+        try:
+            box_info = self.client.application_box_by_name(self.app_id, session_box[1])
+            box_data = base64.b64decode(box_info['value'])
+            nonce = box_data[97:97+32]
+            nonce_box = (self.app_id, b"nonce:" + nonce)
+        except Exception as e:
+            raise ValueError(f"Failed to read session box: {e}")
         
         from algosdk.abi import Method
         refund_method = Method.from_signature("refund(uint64,uint8,uint8,byte[64],uint8,byte[64],address)void")
@@ -100,7 +127,7 @@ class RelayerAgent:
             
         txn_app = transaction.ApplicationCallTxn(
             sender=self.addr,
-            sp=params,
+            sp=params_main,
             index=self.app_id,
             on_complete=transaction.OnComplete.NoOpOC,
             app_args=[
@@ -113,10 +140,14 @@ class RelayerAgent:
                 attester_2["signature"],
                 encoding.decode_address(self.addr)
             ],
-            boxes=[session_box],
+            boxes=[session_box, nonce_box],
             foreign_assets=[config.USDC_ASA_ID],
             accounts=[config.BUYER_ADDR, self.addr]
         )
+        
+        params_opup = self.client.suggested_params()
+        params_opup.flat_fee = True
+        params_opup.fee = 1000
         
         opup_method = Method.from_signature("opup(uint64)void")
         txns = [txn_app]
@@ -124,18 +155,20 @@ class RelayerAgent:
         for i in range(6):
             txn_opup = transaction.ApplicationCallTxn(
                 sender=self.addr,
-                sp=params,
+                sp=params_opup,
                 index=self.app_id,
                 on_complete=transaction.OnComplete.NoOpOC,
                 app_args=[opup_method.get_selector(), (i).to_bytes(8, "big")]
             )
             txns.append(txn_opup)
             
+        assert len(txns) <= 16, f"Group limit exceeded: {len(txns)} outer transactions"
         gid = transaction.calculate_group_id(txns)
         for t in txns:
             t.group = gid
             
         stxns = [t.sign(self.sk) for t in txns]
+        total_fee = sum(t.fee for t in txns)
         
         tx_id = self.client.send_transactions(stxns)
         res = transaction.wait_for_confirmation(self.client, tx_id, 4)
@@ -149,6 +182,8 @@ class RelayerAgent:
             "tx_id": tx_id,
             "confirmed_round": confirmed_round,
             "outcome": f"Refunded ({reason_str})",
-            "fee": params.fee,
+            "fee": total_fee,
+            "outer_tx_count": len(txns),
+            "inner_tx_count": 2,
             "finality_timestamp": finality_timestamp
         }

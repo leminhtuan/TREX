@@ -69,7 +69,7 @@
                     "name": "deadline_round"
                 },
                 {
-                    "type": "byte[32]",
+                    "type": "uint64",
                     "name": "nonce"
                 },
                 {
@@ -103,6 +103,10 @@
                 {
                     "type": "uint64",
                     "name": "session_id"
+                },
+                {
+                    "type": "address",
+                    "name": "buyer_address"
                 },
                 {
                     "type": "byte[32]",
@@ -143,6 +147,10 @@
                 {
                     "type": "uint64",
                     "name": "session_id"
+                },
+                {
+                    "type": "address",
+                    "name": "buyer_address"
                 },
                 {
                     "type": "uint8",

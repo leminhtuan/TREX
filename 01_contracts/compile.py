@@ -11,10 +11,10 @@ def compile_contract():
     )
 
     with open("approval.teal", "w") as f:
-        f.write(approval)
+        f.write(approval.replace("#pragma version 10", "#pragma version 11"))
     
     with open("clear.teal", "w") as f:
-        f.write(clear)
+        f.write(clear.replace("#pragma version 10", "#pragma version 11"))
         
     with open("contract.json", "w") as f:
         f.write(json.dumps(contract.dictify(), indent=4))

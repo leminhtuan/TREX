@@ -37,7 +37,7 @@ class SessionRecord(abi.NamedTuple):
     amount_pay: abi.Field[abi.Uint64]
     amount_bounty: abi.Field[abi.Uint64]
     deadline_round: abi.Field[abi.Uint64]
-    nonce: abi.Field[abi.StaticBytes[Literal[32]]]
+    nonce: abi.Field[abi.Uint64]
     hash_q: abi.Field[abi.StaticBytes[Literal[32]]]
     hash_c: abi.Field[abi.StaticBytes[Literal[32]]]
     hash_p: abi.Field[abi.StaticBytes[Literal[32]]]
@@ -48,8 +48,11 @@ class SessionRecord(abi.NamedTuple):
 def get_session_box_key(session_id: Expr) -> Expr:
     return Concat(Bytes("session:"), Itob(session_id))
 
-def get_nonce_box_key(nonce: Expr) -> Expr:
-    return Concat(Bytes("nonce:"), nonce)
+def get_nonce_box_key(buyer: Expr, nonce: Expr) -> Expr:
+    return Sha512_256(Concat(Bytes("T-REX-ACTIVE-NONCE"), buyer, Itob(nonce)))
+
+def get_spent_box_key(buyer: Expr, nonce: Expr) -> Expr:
+    return Sha512_256(Concat(Bytes("T-REX-SPENT"), Itob(Global.current_application_id()), buyer, Itob(nonce)))
 
 router = Router(
     "T-REX-Escrow",
@@ -121,7 +124,7 @@ def authorize(
     amount_pay: abi.Uint64,
     amount_bounty: abi.Uint64,
     deadline_round: abi.Uint64,
-    nonce: abi.StaticBytes[Literal[32]],
+    nonce: abi.Uint64,
     hash_q: abi.StaticBytes[Literal[32]],
     hash_c: abi.StaticBytes[Literal[32]],
     buyer_signature: abi.StaticBytes[Literal[64]],
@@ -135,19 +138,16 @@ def authorize(
     
     # Message to verify
     message = Concat(
-        PROTOCOL_DOMAIN,
-        AUTH_PREFIX,
-        Itob(Global.current_application_id()),
-        Global.genesis_hash(),
-        buyer,
-        seller.get(),
-        Itob(usdc_id),
-        Itob(amount_pay.get()),
-        Itob(amount_bounty.get()),
-        Itob(deadline_round.get()),
-        nonce.get(),
+        Bytes("T-REX-BUY"),
+        Itob(session_id),
         hash_q.get(),
-        hash_c.get()
+        hash_c.get(),
+        Itob(amount_pay.get()),
+        Itob(usdc_id),
+        seller.get(),
+        Itob(Global.current_application_id()),
+        Itob(deadline_round.get()),
+        Itob(nonce.get())
     )
     
     return Seq(
@@ -168,10 +168,15 @@ def authorize(
         # Verify Ed25519 signature
         Assert(Ed25519Verify_Bare(message, buyer_signature.get(), buyer)),
         
-        # Nonce uniqueness check
-        (nonce_len := App.box_length(get_nonce_box_key(nonce.get()))),
+        # Nonce uniqueness check (Active Sessions)
+        (nonce_len := App.box_length(get_nonce_box_key(buyer, nonce.get()))),
         Assert(Not(nonce_len.hasValue())),
-        App.box_put(get_nonce_box_key(nonce.get()), Itob(session_id)),
+        
+        # Anti-Replay check for completed sessions (Persistent SPENT box)
+        (spent_len := App.box_length(get_spent_box_key(buyer, nonce.get()))),
+        Assert(Not(spent_len.hasValue())),
+
+        App.box_put(get_nonce_box_key(buyer, nonce.get()), Itob(session_id)),
         
         # Create session box
         (s_state := abi.Uint8()).set(STATE_AUTHORIZED),
@@ -181,7 +186,7 @@ def authorize(
         (s_amount_pay := abi.Uint64()).set(amount_pay.get()),
         (s_amount_bounty := abi.Uint64()).set(amount_bounty.get()),
         (s_deadline := abi.Uint64()).set(deadline_round.get()),
-        (s_nonce := abi.StaticBytesTypeSpec(32).new_instance()).set(nonce.get()),
+        (s_nonce := abi.Uint64()).set(nonce.get()),
         (s_hash_q := abi.StaticBytesTypeSpec(32).new_instance()).set(hash_q.get()),
         (s_hash_c := abi.StaticBytesTypeSpec(32).new_instance()).set(hash_c.get()),
         (s_hash_p := abi.StaticBytesTypeSpec(32).new_instance()).set(BytesZero(Int(32))),
@@ -214,6 +219,7 @@ def get_attester_pk(index: Expr) -> Expr:
 @router.method
 def settle(
     session_id: abi.Uint64,
+    buyer_address: abi.Address,
     hash_p: abi.StaticBytes[Literal[32]],
     seller_signature: abi.StaticBytes[Literal[64]],
     attester_index_1: abi.Uint8,
@@ -239,6 +245,7 @@ def settle(
         
         (buyer := abi.Address()).set(session.buyer),
         (seller := abi.Address()).set(session.seller),
+        Assert(buyer_address.get() == buyer.get()),
         Assert(relayer.get() != buyer.get()),
         Assert(relayer.get() != seller.get()),
         
@@ -250,14 +257,15 @@ def settle(
         Assert(bounty_paid.get() == Int(0)),
         
         # Verify Seller Signature
-        (nonce := abi.StaticBytesTypeSpec(32).new_instance()).set(session.nonce),
+        (nonce := abi.Uint64()).set(session.nonce),
         (msg_s := ScratchVar(TealType.bytes)).store(Concat(
             PROTOCOL_DOMAIN,
             SETTLE_PREFIX,
             Itob(Global.current_application_id()),
             Global.genesis_hash(),
+            buyer_address.get(),
             Itob(session_id.get()),
-            nonce.get(),
+            Itob(nonce.get()),
             hash_p.get()
         )),
         
@@ -267,16 +275,17 @@ def settle(
         (hash_q := abi.StaticBytesTypeSpec(32).new_instance()).set(session.hash_q),
         (hash_c := abi.StaticBytesTypeSpec(32).new_instance()).set(session.hash_c),
         (msg_a := ScratchVar(TealType.bytes)).store(Concat(
-            PROTOCOL_DOMAIN,
-            ATTEST_PREFIX,
+            Bytes("T-REX-ATT"),
             Itob(Global.current_application_id()),
             Global.genesis_hash(),
+            buyer_address.get(),
             Itob(session_id.get()),
-            nonce.get(),
-            Extract(Itob(VERDICT_PASS), Int(7), Int(1)),
             hash_q.get(),
             hash_c.get(),
-            hash_p.get()
+            hash_p.get(),
+            Extract(Itob(VERDICT_PASS), Int(7), Int(1)),
+            Itob(deadline_round.get()),
+            Itob(nonce.get())
         )),
         
         Assert(Ed25519Verify_Bare(msg_a.load(), attester_signature_1.get(), get_attester_pk(attester_index_1.get()))),
@@ -306,23 +315,16 @@ def settle(
         InnerTxnBuilder.Submit(),
         
         # Update State
-        (s_state := abi.Uint8()).set(STATE_RELEASED),
-        (s_bounty_paid := abi.Uint8()).set(Int(1)),
-        (s_threshold := abi.Uint8()).set(Int(2)),
-        (s_count := abi.Uint8()).set(Int(3)),
-        
-        session.set(
-            s_state, buyer, seller, asset_id, amount_pay, amount_bounty,
-            deadline_round, nonce, hash_q, hash_c, hash_p,
-            s_bounty_paid, s_threshold, s_count
-        ),
-        App.box_put(box_key, session.encode()),
+        Pop(App.box_delete(box_key)),
+        Pop(App.box_delete(get_nonce_box_key(buyer.get(), nonce.get()))),
+        App.box_put(get_spent_box_key(buyer.get(), nonce.get()), Bytes("1")),
         Log(Concat(Bytes("RELEASED:"), Itob(session_id.get())))
     )
 
 @router.method
 def refund(
     session_id: abi.Uint64,
+    buyer_address: abi.Address,
     reason: abi.Uint8,
     attester_index_1: abi.Uint8,
     attester_signature_1: abi.StaticBytes[Literal[64]],
@@ -344,20 +346,21 @@ def refund(
         
         (buyer := abi.Address()).set(session.buyer),
         (seller := abi.Address()).set(session.seller),
+        Assert(buyer_address.get() == buyer.get()),
         Assert(relayer.get() != buyer.get()),
         Assert(relayer.get() != seller.get()),
         
         (bounty_paid := abi.Uint8()).set(session.bounty_paid),
         Assert(bounty_paid.get() == Int(0)),
         
-        (nonce := abi.StaticBytesTypeSpec(32).new_instance()).set(session.nonce),
+        (nonce := abi.Uint64()).set(session.nonce),
         (hash_q := abi.StaticBytesTypeSpec(32).new_instance()).set(session.hash_q),
         (hash_c := abi.StaticBytesTypeSpec(32).new_instance()).set(session.hash_c),
         (hash_p := abi.StaticBytesTypeSpec(32).new_instance()).set(session.hash_p),
+        (deadline_round := abi.Uint64()).set(session.deadline_round),
         
         If(reason.get() == REASON_TIMEOUT).Then(
             Seq(
-                (deadline_round := abi.Uint64()).set(session.deadline_round),
                 Assert(Global.round() > deadline_round.get())
             )
         ).ElseIf(reason.get() == REASON_ATTESTED_FAIL).Then(
@@ -367,16 +370,17 @@ def refund(
                 Assert(attester_index_2.get() <= Int(2)),
                 
                 (msg_a := ScratchVar(TealType.bytes)).store(Concat(
-                    PROTOCOL_DOMAIN,
-                    ATTEST_PREFIX,
+                    Bytes("T-REX-ATT"),
                     Itob(Global.current_application_id()),
                     Global.genesis_hash(),
+                    buyer_address.get(),
                     Itob(session_id.get()),
-                    nonce.get(),
-                    Extract(Itob(VERDICT_FAIL), Int(7), Int(1)),
                     hash_q.get(),
                     hash_c.get(),
-                    hash_p.get()
+                    hash_p.get(),
+                    Extract(Itob(VERDICT_FAIL), Int(7), Int(1)),
+                    Itob(deadline_round.get()),
+                    Itob(nonce.get())
                 )),
                 
                 Assert(Ed25519Verify_Bare(msg_a.load(), attester_signature_1.get(), get_attester_pk(attester_index_1.get()))),
@@ -410,18 +414,9 @@ def refund(
         InnerTxnBuilder.Submit(),
         
         # Update State
-        (deadline_round := abi.Uint64()).set(session.deadline_round),
-        (s_state := abi.Uint8()).set(STATE_REFUNDED),
-        (s_bounty_paid := abi.Uint8()).set(Int(1)),
-        (s_threshold := abi.Uint8()).set(Int(2)),
-        (s_count := abi.Uint8()).set(Int(3)),
-        
-        session.set(
-            s_state, buyer, seller, asset_id, amount_pay, amount_bounty,
-            deadline_round, nonce, hash_q, hash_c, hash_p,
-            s_bounty_paid, s_threshold, s_count
-        ),
-        App.box_put(box_key, session.encode()),
+        Pop(App.box_delete(box_key)),
+        Pop(App.box_delete(get_nonce_box_key(buyer.get(), nonce.get()))),
+        App.box_put(get_spent_box_key(buyer.get(), nonce.get()), Bytes("1")),
         Log(Concat(Bytes("REFUNDED:"), Itob(session_id.get()), Extract(Itob(reason.get()), Int(7), Int(1))))
     )
 
