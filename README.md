@@ -1,4 +1,4 @@
-# T-REX Reproducibility Artifact & Single Source of Truth
+# T-REX Reproducibility Artifact
 
 This repository contains the complete empirical evaluation artifacts, data, and scripts for the manuscript: **"T-REX: SLA-Bound Conditional Settlement for HTTP-Native Agentic Commerce"**. 
 
