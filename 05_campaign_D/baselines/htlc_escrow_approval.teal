@@ -1,0 +1,281 @@
+#pragma version 11
+txn ApplicationID
+int 0
+==
+bnz main_l16
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l6
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l5
+err
+main_l5:
+txn Sender
+global CreatorAddress
+==
+return
+main_l6:
+txn Sender
+global CreatorAddress
+==
+return
+main_l7:
+txna ApplicationArgs 0
+byte "fund"
+==
+bnz main_l15
+txna ApplicationArgs 0
+byte "claim"
+==
+bnz main_l14
+txna ApplicationArgs 0
+byte "refund"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "optin_asa"
+==
+bnz main_l12
+err
+main_l12:
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+int 0
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l13:
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_len
+store 1
+store 0
+load 1
+assert
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 0
+int 1
+box_extract
+byte "\x00"
+==
+assert
+global Round
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 105
+int 8
+box_extract
+btoi
+>
+assert
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 1
+int 32
+box_extract
+itxn_field AssetReceiver
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 65
+int 8
+box_extract
+btoi
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_del
+pop
+int 1
+return
+main_l14:
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_len
+store 1
+store 0
+load 1
+assert
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 0
+int 1
+box_extract
+byte "\x00"
+==
+assert
+global Round
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 105
+int 8
+box_extract
+btoi
+<=
+assert
+txn Sender
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 33
+int 32
+box_extract
+==
+assert
+txna ApplicationArgs 2
+sha256
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 73
+int 32
+box_extract
+==
+assert
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+txn Sender
+itxn_field AssetReceiver
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 65
+int 8
+box_extract
+btoi
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_del
+pop
+int 1
+return
+main_l15:
+global GroupSize
+int 2
+==
+assert
+gtxn 0 TypeEnum
+int axfer
+==
+assert
+gtxn 0 XferAsset
+txna Assets 0
+==
+assert
+gtxn 0 AssetReceiver
+global CurrentApplicationAddress
+==
+assert
+gtxn 0 AssetAmount
+txna ApplicationArgs 3
+btoi
+==
+assert
+gtxn 0 Sender
+txn Sender
+==
+assert
+txna ApplicationArgs 4
+len
+int 32
+==
+assert
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_len
+store 1
+store 0
+load 1
+!
+assert
+byte "htlc_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+byte "\x00"
+txn Sender
+concat
+txna ApplicationArgs 2
+concat
+txna ApplicationArgs 3
+concat
+txna ApplicationArgs 4
+concat
+txna ApplicationArgs 5
+concat
+box_put
+int 1
+return
+main_l16:
+int 1
+return

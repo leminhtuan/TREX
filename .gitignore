@@ -68,6 +68,7 @@ generate_tex.py
 generate_x402_files.py
 update_sensitivity_summary.py
 verify_*.py
+!repro/verify_peerj_claims.py
 full_double_audit.py
 test_one_session.py
 test_simulate_method.py

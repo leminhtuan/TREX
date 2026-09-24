@@ -15,7 +15,7 @@ class RelayerAgent:
         self.app_id = config.APP_ID
         self.client = algod.AlgodClient("", config.ALGONODE_URL)
         
-    def settle(self, session_id, H_p, seller_signature, attester_1, attester_2):
+    def settle(self, session_id, H_p, seller_signature, attester_1, attester_2, opup_count: int = 15):
         params_main = self.client.suggested_params()
         params_main.flat_fee = True
         params_main.fee = 3000
@@ -68,8 +68,8 @@ class RelayerAgent:
         
         opup_method = Method.from_signature("opup(uint64)void")
         txns = [txn_app]
-        # We need 10 AppCalls total for settle (1 main + 9 opups)
-        for i in range(9):
+        # Deployed configuration uses 15 OpUp AppCalls (16 outer AppCalls total)
+        for i in range(opup_count):
             txn_opup = transaction.ApplicationCallTxn(
                 sender=self.addr,
                 sp=params_opup,
@@ -103,7 +103,7 @@ class RelayerAgent:
             "finality_timestamp": finality_timestamp
         }
         
-    def refund(self, session_id, reason, attester_1=None, attester_2=None):
+    def refund(self, session_id, reason, attester_1=None, attester_2=None, opup_count: int = None):
         params_main = self.client.suggested_params()
         params_main.flat_fee = True
         params_main.fee = 3000
@@ -159,8 +159,10 @@ class RelayerAgent:
         
         opup_method = Method.from_signature("opup(uint64)void")
         txns = [txn_app]
-        # We need 7 AppCalls total for refund (1 main + 6 opups)
-        for i in range(6):
+        # Attested Fail requires 6 opups (7 AppCalls total, budget 4900). Timeout requires 2 opups (3 AppCalls total).
+        if opup_count is None:
+            opup_count = 6 if reason == 1 else 2
+        for i in range(opup_count):
             txn_opup = transaction.ApplicationCallTxn(
                 sender=self.addr,
                 sp=params_opup,

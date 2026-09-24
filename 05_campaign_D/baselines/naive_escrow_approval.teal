@@ -1,0 +1,261 @@
+#pragma version 10
+txn ApplicationID
+int 0
+==
+bnz main_l20
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l19
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l18
+txn OnCompletion
+int OptIn
+==
+bnz main_l17
+txn OnCompletion
+int CloseOut
+==
+bnz main_l16
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "authorize"
+==
+bnz main_l15
+txna ApplicationArgs 0
+byte "release"
+==
+bnz main_l14
+txna ApplicationArgs 0
+byte "refund"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "optin_asa"
+==
+bnz main_l12
+err
+main_l12:
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+int 0
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l13:
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_len
+store 1
+store 0
+load 1
+assert
+global Round
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 73
+int 8
+box_extract
+btoi
+>
+assert
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 0
+int 1
+box_extract
+byte "\x00"
+==
+assert
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 1
+int 32
+box_extract
+itxn_field AssetReceiver
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 65
+int 8
+box_extract
+btoi
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_del
+pop
+int 1
+return
+main_l14:
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_len
+store 1
+store 0
+load 1
+assert
+txn Sender
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 33
+int 32
+box_extract
+==
+assert
+global Round
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 73
+int 8
+box_extract
+btoi
+<=
+assert
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 0
+int 1
+box_extract
+byte "\x00"
+==
+assert
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Assets 0
+itxn_field XferAsset
+txn Sender
+itxn_field AssetReceiver
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+int 65
+int 8
+box_extract
+btoi
+itxn_field AssetAmount
+int 0
+itxn_field Fee
+itxn_submit
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+box_del
+pop
+int 1
+return
+main_l15:
+global GroupSize
+int 2
+==
+assert
+gtxn 0 TypeEnum
+int axfer
+==
+assert
+gtxn 0 XferAsset
+txna Assets 0
+==
+assert
+gtxn 0 AssetReceiver
+global CurrentApplicationAddress
+==
+assert
+gtxn 0 AssetAmount
+txna ApplicationArgs 3
+btoi
+==
+assert
+gtxn 0 Sender
+txn Sender
+==
+assert
+byte "session_"
+txna ApplicationArgs 1
+btoi
+itob
+concat
+byte "\x00"
+txn Sender
+concat
+txna ApplicationArgs 2
+concat
+txna ApplicationArgs 3
+concat
+txna ApplicationArgs 4
+concat
+box_put
+int 1
+return
+main_l16:
+int 1
+return
+main_l17:
+int 1
+return
+main_l18:
+int 1
+return
+main_l19:
+int 1
+return
+main_l20:
+int 1
+return
