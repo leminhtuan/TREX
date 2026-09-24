@@ -255,6 +255,27 @@ If you wish to execute *new* live transactions on Algorand Testnet against App `
 
 ## 7. Cryptographic Manifest & Ledger Provenance
 
+### Reproducibility Anchors (Paper Table 7 & `REPRODUCIBILITY_MANIFEST.json`)
+
+The following cryptographic anchors lock the exact environment, compiler, node build, and bytecode hashes supporting the paper's empirical claims:
+
+| Parameter | Value / Hash |
+| :--- | :--- |
+| **Git Commit SHA** | `e72b37f08959cd99669975b24fb2f396f1515d04` |
+| **PyTeal Version** | `0.26.1` |
+| **py-algorand-sdk Version** | `2.6.0` |
+| **Algod Node Version** | `5.0.2-AVAIL` (Build `fe1308bd+`) |
+| **Canonical App ID** | `772170811` |
+| **App Escrow Address** | `JYDZRPKR2CGMZSKWKUCJUU7FNR5IF3NE33W2QHKFFZYKMKMNQFCLT2ILBQ` |
+| **Approval Source SHA-256** | `113714efe22d2be345d08759599dd57988a6f4e7b922fd2402be5f22499b9614` |
+| **Approval Bytecode SHA-256** | `b825eed62827571db80d5db04961742da5284e8eaa2074cf66071f375dce22b6` |
+| **Clear State Source SHA-256** | `5c7ae52bc739613df8e87cd03e6e826254cc26f3f596089d09de16ddd58e6901` |
+
+To independently re-verify and generate this manifest on your machine:
+```bash
+python scripts/generate_reproducibility_manifest.py
+```
+
 ### Registered On-Chain Keys (App 772170811 Global State)
 * `attester_pk_0`: `8feb683f85f7574bcbde15dad54524516789b4bdf4e1884b966fe17e1cd5376e`
 * `attester_pk_1`: `683b7592f4aa1d3767c2ae76f20df152abb3b67d6b854d43dc3e6b11ef90a0a4`

@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/leminhtuan/TREX/schemas/reproducibility_manifest.schema.json",
+  "title": "TREXReproducibilityManifest",
+  "description": "Strict JSON Schema for PeerJ reproducibility verification of T-REX smart contract deployment and toolchain versions.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "generated_at_utc",
+    "reproducibility_mapping",
+    "environment",
+    "audit_verification"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reproducibility_mapping": {
+      "type": "object",
+      "description": "Exact mapping between git commit, compiler version, node version, application ID, and cryptographic hashes.",
+      "required": [
+        "commit_sha",
+        "pyteal_version",
+        "algod_version",
+        "canonical_app_id",
+        "approval_program"
+      ],
+      "properties": {
+        "commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "Full 40-character Git Commit SHA identifying the source code state."
+        },
+        "pyteal_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+",
+          "description": "Exact version of the PyTeal compiler used to generate TEAL AST."
+        },
+        "py_algorand_sdk_version": {
+          "type": "string",
+          "description": "Version of py-algorand-sdk used by test runner and client agents."
+        },
+        "algod_version": {
+          "type": "string",
+          "description": "Version of the Algorand node daemon (Algod) executing the AVM bytecode."
+        },
+        "algod_build_commit": {
+          "type": "string",
+          "description": "Git commit hash of the Algod binary build."
+        },
+        "target_network": {
+          "type": "string",
+          "enum": ["testnet", "mainnet", "betanet", "sandnet"]
+        },
+        "canonical_app_id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Unique on-chain Algorand Application ID for the frozen contract."
+        },
+        "app_address": {
+          "type": "string",
+          "pattern": "^[A-Z2-7]{58}$",
+          "description": "58-character Base32 Algorand escrow application account address."
+        },
+        "approval_program": {
+          "type": "object",
+          "required": [
+            "source_file",
+            "source_sha256",
+            "compiled_bytecode_sha256"
+          ],
+          "properties": {
+            "source_file": { "type": "string" },
+            "source_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "SHA-256 hash of the human-readable TEAL source file."
+            },
+            "compiled_bytecode_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "SHA-256 hash of the compiled raw AVM bytecode deployed on-chain."
+            },
+            "compiled_program_address": {
+              "type": "string",
+              "pattern": "^[A-Z2-7]{58}$",
+              "description": "Algorand address hash of the compiled approval bytecode."
+            }
+          }
+        },
+        "clear_program": {
+          "type": "object",
+          "required": [
+            "source_file",
+            "source_sha256"
+          ],
+          "properties": {
+            "source_file": { "type": "string" },
+            "source_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["python_version", "operating_system"],
+      "properties": {
+        "python_version": { "type": "string" },
+        "operating_system": { "type": "string" },
+        "consensus_protocol": { "type": "string" }
+      }
+    },
+    "audit_verification": {
+      "type": "object",
+      "required": ["frozen_security_commit", "verification_status"],
+      "properties": {
+        "frozen_security_commit": { "type": "string" },
+        "release_tag": { "type": "string" },
+        "repository": { "type": "string", "format": "uri" },
+        "verification_status": {
+          "type": "string",
+          "enum": ["VERIFIED_CANONICAL", "UNVERIFIED", "PROVISIONAL"]
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

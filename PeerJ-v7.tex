@@ -504,7 +504,29 @@ Application & Revision locator & Reported evaluation\\
 \end{tabularx}
 \end{table}
 
-The source summary abbreviates its clear-program identifier; a complete reproducibility manifest records the full commit, compiler versions, and executable bytes.
+The source summary abbreviates its clear-program identifier; a complete reproducibility manifest records the full commit, compiler versions, and executable bytes (Table~\ref{tab:manifest}).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Cryptographic anchors from the reproducibility manifest.}
+\label{tab:manifest}
+\begin{tabularx}{\linewidth}{@{}p{0.32\linewidth}Y@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value / Hash} \\
+\midrule
+Git Commit SHA & \texttt{e72b37f08959cd99669975b24fb2f396f1515d04} \\
+PyTeal Version & \texttt{0.26.1} \\
+py-algorand-sdk Version & \texttt{2.6.0} \\
+Algod Node Version & \texttt{5.0.2-AVAIL} (Build \texttt{fe1308bd+}) \\
+Canonical App ID & 772170811 \\
+App Escrow Address & \texttt{JYDZRPKR2CGMZSKWKUCJUU7FNR5IF3NE33W2QHKFFZYKMKMNQFCLT2ILBQ} \\
+Approval Source SHA-256 & \texttt{113714efe22d2be345d08759599dd57988a6f4e7b922fd2402be5f22499b9614} \\
+Approval Bytecode SHA-256 & \texttt{b825eed62827571db80d5db04961742da5284e8eaa2074cf66071f375dce22b6} \\
+Clear State Source SHA-256 & \texttt{5c7ae52bc739613df8e87cd03e6e826254cc26f3f596089d09de16ddd58e6901} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Functional results}
 
@@ -653,7 +675,7 @@ These invariants strictly assume SPENT is never deleted and contract policy does
 \subsection*{Data and code availability}
 % ============================================================
 
-The core protocol specification, the 202-byte message domain generators, and the raw CSV traces for the 100-session functional campaign (measured on canonical App ID 772170811), the HTLC baseline (App ID 772482753), and the 10 targeted adversarial tests are openly archived at \url{https://github.com/leminhtuan/TREX} (Repository Release Commit \texttt{9629369}, Tag \texttt{v1.0.0-peerjcs}). The final hardened smart contract artifact (App ID 772170811) corresponds to the unified security logic frozen at historical commit \texttt{f84a769}.
+The complete protocol specification, smart contract bytecodes, client orchestrators, and raw empirical ledger traces supporting the findings of this study are openly archived at \url{https://github.com/leminhtuan/TREX} (Repository Release Tag \texttt{v1.0.1-peerj-canonical}, Commit \texttt{e72b37f}). The canonical hardened smart contract artifact (Application ID 772170811; approval program hash \texttt{RRYTW7VQWWP722I74TFQGPVDE6T2HWPQEJXDP5CGFAXG2UGSJJ62P3OOBM}) represents the unified security logic frozen at historical deployment commit \texttt{f84a769}. The archived repository comprehensively provides: (i) the TEAL~v11 PyTeal contract specifications and compiled bytecodes; (ii) the 202-byte attestation domain message generators ($M_B, M_S, M_A$) and the 3-valued Kleene SSPL evaluator; (iii) the complete raw CSV execution traces for the 100-session functional campaign on Application 772170811, documenting individual transaction identifiers, confirmation rounds, RPC round-trip times, and persistent SPENT box states; (iv) the empirical benchmark dataset for the on-chain HTLC baseline (Application ID 772482753); (v) the cryptographic evidence traces for the 10 targeted negative adversarial tests rejected on Application 772170811; and (vi) the automated, self-contained verification suite (\texttt{repro/verify_peerj_claims.py}) reproducing all reported tabular metrics, fee breakdowns, and exploratory lognormal distribution parameters.
 
 % ============================================================
 \section*{Funding Statement}

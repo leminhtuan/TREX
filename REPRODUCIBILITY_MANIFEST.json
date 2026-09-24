@@ -1,0 +1,36 @@
+{
+  "$schema": "./reproducibility_manifest.schema.json",
+  "manifest_version": "1.0.0",
+  "generated_at_utc": "2026-09-24T14:23:03.932989+00:00",
+  "reproducibility_mapping": {
+    "commit_sha": "e72b37f08959cd99669975b24fb2f396f1515d04",
+    "pyteal_version": "0.26.1",
+    "py_algorand_sdk_version": "2.6.0",
+    "algod_version": "5.0.2-AVAIL",
+    "algod_build_commit": "fe1308bd+",
+    "target_network": "testnet",
+    "canonical_app_id": 772170811,
+    "app_address": "JYDZRPKR2CGMZSKWKUCJUU7FNR5IF3NE33W2QHKFFZYKMKMNQFCLT2ILBQ",
+    "approval_program": {
+      "source_file": "01_contracts/approval.teal",
+      "source_sha256": "113714efe22d2be345d08759599dd57988a6f4e7b922fd2402be5f22499b9614",
+      "compiled_bytecode_sha256": "b825eed62827571db80d5db04961742da5284e8eaa2074cf66071f375dce22b6",
+      "compiled_program_address": "RRYTW7VQWWP722I74TFQGPVDE6T2HWPQEJXDP5CGFAXG2UGSJJ62P3OOBM"
+    },
+    "clear_program": {
+      "source_file": "01_contracts/clear.teal",
+      "source_sha256": "5c7ae52bc739613df8e87cd03e6e826254cc26f3f596089d09de16ddd58e6901"
+    }
+  },
+  "environment": {
+    "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "operating_system": "nt",
+    "consensus_protocol": "Algorand Byzantine Agreement (AVM 8/9/10)"
+  },
+  "audit_verification": {
+    "frozen_security_commit": "f84a769",
+    "release_tag": "v1.0.1-peerj-canonical",
+    "repository": "https://github.com/leminhtuan/TREX",
+    "verification_status": "VERIFIED_CANONICAL"
+  }
+}
